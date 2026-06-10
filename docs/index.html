@@ -224,6 +224,9 @@ footer .dog{margin-left:auto;color:var(--dim)}
   padding:9px 16px;font-size:11.5px;transition:.25s;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+.block.ccoff{opacity:.35;pointer-events:auto}
+.block.ccoff::before{content:"только claude code";position:absolute;top:9px;right:34px;color:var(--faint);
+  font-size:8.5px;letter-spacing:.08em;border:1px solid var(--line);border-radius:999px;padding:2px 7px;background:rgba(0,0,0,.3)}
 @media(max-width:920px){
   .layout{grid-template-columns:1fr}
   .panel{position:static}
@@ -397,6 +400,7 @@ const FNAME = {
 const BLOCKS = [
  {id:'entry', core:1, ic:'entry', t:'точка входа · CLAUDE.md', d:'кто ты, файлы, как помогать. читается каждой сессией.', art:'~/.claude/CLAUDE.md ≤60 строк',
   ins:'собери мой CLAUDE.md: 7 вопросов (роль, практика, задачи, файлы, стиль), покажи файл до сохранения, ≤60 строк',
+  chat:'собери мой стартовый контекст-блок (те же 7 вопросов): текст ≤40 строк, который я вставляю в начало каждого нового чата — он заменяет файл CLAUDE.md',
   ex:'# контур · м.\n## кто я\nпродакт-лид, практика: ifs + страницы…\n## мои файлы\n- ппр: selfdev/about-me.md\n- части: parts-map.md — НЕ цитировать\n## границы — никогда без подтверждения\n- ничего не отправлять наружу'},
  {id:'bounds', core:1, ic:'bounds', t:'карта границ', d:'можно · спрашивать · никогда. терапия не покидает машину.', art:'permissions-блок в CLAUDE.md',
   ins:'сними карту границ (public / local / ask_first / never) и запиши блоком «границы» в CLAUDE.md',
@@ -406,17 +410,21 @@ const BLOCKS = [
   ex:'| слой        | есть          | шаг        |\n| context     | about-me (d4) | подключить |\n| permissions | в голове      | в CLAUDE.md|\n| lifecycle   | —             | ритуал в кал.|'},
  {id:'skills', core:1, ic:'skills', t:'первые 3 скилла', d:'из живых повторов. повторяемость + отчуждаемость.', art:'~/.claude/skills/…/SKILL.md ×3',
   ins:'выбери 3 задачи (повторяемость+отчуждаемость), оформи скиллами (description = только триггеры), первый прогони сразу',
+  chat:'выбери 3 задачи и оформи каждую как сохранённый промпт-рецепт: триггер · шаги · формат результата; я храню их в заметках и вставляю по триггеру; первый прогони прямо сейчас',
   ex:'---\nname: weekly-reflect\ndescription: "Use when разбор недели…"\n---\n# шаги: следы → паттерн → вопрос\n# не использовать: в остром состоянии'},
  {id:'memory', core:0, ic:'memory', t:'память + адресация', d:'что хранить, что никогда. имя файла = адрес.', art:'memory-rules.md + naming',
   ins:'составь memory-rules (хранить / ask_first / never / право на забывание) + зафиксируй naming convention',
+  chat:'составь memory-rules для чат-режима: что я вставляю в начало сессии (контекст-блок), что прошу в конце («сводка для переноса»), что никогда не пишу в чат',
   ex:'хранить: цели, трекинг, исходы решений\nask_first: выводы агента о паттернах\nникогда: терапия дословно, третьи лица\nпо «забудь это» — удалить без следа'},
  {id:'rails', core:0, ic:'rails', t:'журнал решений', d:'решения двигаются, когда у них есть дата ревью.', art:'decision-rails.md',
   ins:'заведи decision-rails.md, проведи одно зависшее решение: часть-против → обратимость → ≥3 варианта → woop → if-then → дата',
   ex:'## разговор с к.\nчасть против: «дипломат»\nварианты: письмо → разговор · фасилитатор · ничего\nif-then: ловлю смягчение → читаю якорь\nreview: 2026-06-20 · открыт'},
  {id:'inspector', core:0, ic:'inspector', t:'session inspector lite', d:'сессии → темы → что брошено → handoff.', art:'sessions-review.html',
+  ccOnly:1,
   ins:'собери обзор сессий из ~/.claude/projects за 7 дней: темы, незакрытое, handoff-промпты, паттерны → html',
   ex:'| тема     | осталось      | handoff   |\n| контур   | евалы в вс    | «открой…» |\n| разговор | debrief вт    | «прочитай…»|\nпаттерн: бросаю всё бездатное'},
  {id:'multi', core:0, ic:'multi', t:'мультитерминал', d:'окно = задача · handoff на 50% · субагенты = ресёрч.', art:'правило в CLAUDE.md',
+  ccOnly:1,
   ins:'объясни мультитерминальный протокол на моих задачах, добавь правило в CLAUDE.md',
   ex:'окно 1 — проект, исполнение\nокно 2 — ресёрч (субагент)\nконтекст 50% → «собери handoff»\n→ новое окно → вставил → дальше'},
  {id:'insight', core:0, ic:'insight', t:'insight_index', d:'копилка: дата · паттерн · след-основание.', art:'insight_index.md',
@@ -424,6 +432,7 @@ const BLOCKS = [
   ex:'2026-06-15 · решения двигаются, когда\nесть дата · след: 3 закрытых — все с ревью'},
  {id:'refresh', core:1, ic:'refresh', t:'ритуал refresh', d:'15 минут раз в 1–2 недели. контур против музея.', art:'событие в календаре + чеклист',
   ins:'настрой refresh: чеклист 4 вопросов + повторяющееся событие; первый — после первых трёх скиллов',
+  chat:'настрой refresh для чат-режима: раз в 1–2 недели приношу тебе контекст-блок и промпт-рецепты — ревизия по чеклисту 4 вопросов, обновлённые версии назад в заметки',
   ex:'□ что не использовалось месяц → удалить\n□ что трижды руками → в скилл\n□ где агент ошибся ×3 → правило\n□ границы ещё верные?'},
 ];
 
@@ -494,6 +503,7 @@ BLOCKS.forEach((b,i)=>{
     el.querySelector('.sym').textContent=S.on.has(b.id)?'◆':'◇';
     persist();render();
   });
+  el.dataset.bid=b.id;
   grid.appendChild(el);
 });
 
@@ -506,7 +516,7 @@ function updateGridDim(){
 document.querySelectorAll('#seg button').forEach(btn=>{
   if(btn.dataset.lv===S.lv){document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');}
   btn.onclick=()=>{S.lv=btn.dataset.lv;
-    document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===btn));persist();render();};
+    document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===btn));persist();render();updateLv();};
 });
 const lensNote=document.getElementById('lens-note');
 document.querySelectorAll('.lens').forEach(ch=>{
@@ -517,6 +527,12 @@ document.querySelectorAll('.lens').forEach(ch=>{
 });
 
 /* ─── compose: возвращает {parts, plain} ─── */
+function updateLv(){
+  document.querySelectorAll('#blocks .block').forEach(el=>{
+    const b=BLOCKS.find(x=>x.id===el.dataset.bid);
+    el.classList.toggle('ccoff', S.lv==='chat' && !!(b&&b.ccOnly));
+  });
+}
 function compose(){
   const sel=BLOCKS.filter(b=>S.on.has(b.id));
   const ls=[...S.lenses].map(k=>LENSES[k]).filter(Boolean);
@@ -526,7 +542,11 @@ function compose(){
 
   // собираем нумерованные пункты с метой
   const rows=[];
-  sel.forEach(b=>rows.push({kind:'block',id:b.id,text:`${b.t} — ${b.ins}. артефакт: ${b.art}.`}));
+  sel.forEach(b=>{
+    if(S.lv==='chat'&&b.ccOnly)return;
+    const ins=(S.lv==='chat'&&b.chat)?b.chat:b.ins;
+    rows.push({kind:'block',id:b.id,text:`${b.t} — ${ins}. артефакт: ${b.art}.`});
+  });
   ls.forEach(l=>rows.push({kind:'lens',text:`${l.ins}.`}));
 
   const discovery=ls.length
@@ -544,7 +564,7 @@ function compose(){
   const frameTail=`
 правила процесса:
 — ${discovery};
-— все файлы контура — в локальной папке selfdev/; имена-следы по naming convention {проект} {тип} описание – ГГГГ-ММ-ДД.md;
+${S.lv==='chat'?'— артефакты я сохраняю в своих заметках; имена-следы по naming convention {проект} {тип} описание – ГГГГ-ММ-ДД;':'— все файлы контура — в локальной папке selfdev/; имена-следы по naming convention {проект} {тип} описание – ГГГГ-ММ-ДД.md;'}
 — каждый пункт завершается артефактом; показывай его мне до сохранения;
 — материал терапии и глубокие личные данные — local-only и ask_first; ничего не уходит наружу без моего явного «да»;
 — вопросы вместо интерпретаций, без диагнозов и мотивационного тона; пункт не нужен — пропускаем без уговоров.
