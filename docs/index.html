@@ -28,13 +28,14 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   radial-gradient(680px 520px at 92% 8%, rgba(94,155,240,.10), transparent 62%),
   linear-gradient(180deg, var(--bg1), var(--bg0) 45%, var(--bg2))}
 @keyframes cardIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+@keyframes promptFlash{0%{background:var(--glass-strong)}40%{background:rgba(169,139,240,.18)}100%{background:var(--glass-strong)}}
 @media(prefers-reduced-motion:reduce){.block,.panel,.hero{animation:none!important}}
 
 .wrap{max-width:1200px;margin:0 auto;padding:0 20px 70px}
 header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
   background:linear-gradient(180deg, rgba(13,11,20,.88), rgba(13,11,20,.6));border-bottom:1px solid var(--line-soft)}
-.bar{max-width:1200px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:12px}
-.logo{height:24px;width:auto;display:block;opacity:.92}
+.bar{max-width:1200px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:12px}
+.logo{height:30px;width:auto;display:block;filter:drop-shadow(0 0 12px rgba(169,139,240,.35))}
 .mark{font-weight:600;font-size:13px}
 .mark em{font-style:normal;color:var(--accent2)}
 .bar .right{margin-left:auto;display:flex;gap:7px}
@@ -42,16 +43,17 @@ header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-
   border-radius:999px;color:var(--dim);text-decoration:none;font-size:11px;background:var(--glass-hi);transition:.15s}
 .chip:hover{color:var(--ink);border-color:var(--line-hi)}
 
-.hero{padding:34px 0 4px;animation:cardIn .4s both}
-.hero h1{margin:0 0 7px;font-size:24px;font-weight:600;letter-spacing:-.01em}
+/* hero — compact */
+.hero{padding:22px 0 4px;animation:cardIn .4s both}
+.hero h1{margin:0 0 4px;font-size:20px;font-weight:600;letter-spacing:-.01em}
 .hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--accent2));
   -webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{margin:0;color:var(--dim);max-width:660px;font-size:12.5px}
-.steps{display:flex;gap:8px;margin:14px 0 2px;flex-wrap:wrap}
-.steps span{padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:10.5px;background:var(--glass-hi)}
+.hero p{margin:0;color:var(--dim);max-width:660px;font-size:12px}
+.steps{display:flex;gap:7px;margin:10px 0 2px;flex-wrap:wrap}
+.steps span{padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:10.5px;background:var(--glass-hi)}
 .steps b{color:var(--accent2);font-weight:600;margin-right:5px}
 
-.layout{display:grid;grid-template-columns:1.22fr .95fr;gap:16px;margin-top:20px;align-items:start}
+.layout{display:grid;grid-template-columns:1.22fr .95fr;gap:16px;margin-top:18px;align-items:start}
 
 .lbl{width:100%;color:var(--faint);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;margin:7px 0 1px}
 .controls{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
@@ -65,36 +67,63 @@ header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-
 .lens.on::before{content:"+ ";color:var(--accent)}
 .lens-note{width:100%;color:var(--faint);font-size:10.5px;margin-top:2px}
 
+/* блоки */
 .blocks{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.block{position:relative;border:1px solid var(--line);border-radius:var(--r);padding:12px 13px 10px;
+.block{position:relative;border:1px solid var(--line);border-radius:var(--r);padding:13px 13px 11px;
   background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
   cursor:pointer;transition:transform .18s, box-shadow .18s, border-color .18s;animation:cardIn .35s both}
 .block:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--line-hi)}
-.block .bh{display:flex;gap:10px;align-items:flex-start}
-.block svg.ic{flex:0 0 34px;width:34px;height:34px;margin-top:1px}
-.block svg.ic *{stroke:var(--faint);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;transition:.2s}
+
+/* иконка-капсула */
+.block .bh{display:flex;gap:11px;align-items:flex-start;margin-bottom:7px}
+.block .icon-cap{flex:0 0 40px;width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;transition:.2s}
+.block.on .icon-cap{background:rgba(169,139,240,.1);border-color:rgba(169,139,240,.35)}
+.block svg.ic{width:20px;height:20px}
+.block svg.ic *{stroke:var(--faint);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:.2s}
 .block.on svg.ic *{stroke:var(--accent2)}
-.block h3{margin:0 0 2px;font-size:12.5px;font-weight:600;line-height:1.3}
-.block p{margin:0;color:var(--dim);font-size:10.8px;line-height:1.45}
-.block .art{margin-top:6px;color:var(--faint);font-size:10px}
-.block .art b{color:var(--dim);font-weight:500}
+
+.block h3{margin:0 0 3px;font-size:12.5px;font-weight:600;line-height:1.3}
+.block p{margin:0;color:var(--dim);font-size:10.8px;line-height:1.5}
+.block .art{margin-top:6px;display:flex;align-items:center;gap:5px}
+.block .art-chip{color:var(--faint);font-size:9.5px;background:rgba(255,255,255,.04);border:1px solid var(--line-soft);
+  border-radius:6px;padding:2px 7px;white-space:nowrap}
+.block .art-chip b{color:var(--dim);font-weight:500}
+.block .gh-link{font-size:10px;color:var(--accent2);text-decoration:none;margin-left:auto;white-space:nowrap;opacity:.75;transition:.15s}
+.block .gh-link:hover{opacity:1;text-decoration:underline}
 .block .sym{position:absolute;top:11px;right:12px;color:var(--faint);font-size:12px;transition:.2s}
-.block.on{border-color:rgba(169,139,240,.55);background:linear-gradient(180deg, rgba(169,139,240,.09), var(--glass));
-  box-shadow:0 0 0 1px rgba(169,139,240,.22)}
+.block.on{border-color:rgba(169,139,240,.55);
+  background:linear-gradient(180deg, rgba(169,139,240,.09), var(--glass));
+  box-shadow:inset 0 0 0 1px rgba(169,139,240,.18), 0 0 0 1px rgba(169,139,240,.12)}
+.block.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  border-radius:var(--r) 0 0 var(--r);background:var(--accent2);opacity:.8}
 .block.on .sym{color:var(--accent2)}
-.block .ex-t{margin-top:7px;font-size:10px;color:var(--accent);cursor:pointer;width:fit-content}
-.block .ex-t:hover{text-decoration:underline}
-.block pre.ex{display:none;margin:7px 0 0;padding:9px 10px;background:rgba(0,0,0,.32);border:1px solid var(--line-soft);
-  border-radius:8px;color:var(--dim);font-size:10px;line-height:1.55;white-space:pre-wrap;font-family:var(--mono)}
-.block.exo pre.ex{display:block}
 .block.core::after{content:"ядро";position:absolute;bottom:9px;right:12px;color:var(--faint);font-size:8.5px;letter-spacing:.1em}
 
+/* терминал-превью примера */
+.block .ex-wrap{margin-top:8px;border:1px solid var(--line-soft);border-radius:8px;overflow:hidden;cursor:default}
+.block .ex-bar{display:flex;align-items:center;gap:5px;padding:5px 9px;background:rgba(0,0,0,.35);border-bottom:1px solid var(--line-soft)}
+.block .ex-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.18);display:inline-block}
+.block .ex-fname{margin-left:6px;font-size:9.5px;color:var(--faint);flex:1}
+.block .ex-body{position:relative}
+.block pre.ex{margin:0;padding:9px 10px;background:rgba(0,0,0,.28);
+  color:var(--dim);font-size:9.8px;line-height:1.55;white-space:pre-wrap;font-family:var(--mono);
+  max-height:92px;overflow:hidden;transition:max-height .3s ease}
+.block pre.ex.open{max-height:600px}
+.block .ex-fade{position:absolute;bottom:0;left:0;right:0;height:30px;
+  background:linear-gradient(transparent, rgba(10,8,18,.9));pointer-events:none;transition:opacity .3s}
+.block pre.ex.open + .ex-fade{opacity:0}
+
+/* панель промпта */
 .panel{position:sticky;top:62px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
   background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
   box-shadow:var(--shadow-lg);animation:cardIn .4s .1s both}
-.panel .ph{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--line-soft)}
+.panel .ph{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--line-soft);
+  transition:background .4s}
+.panel .ph.flash{animation:promptFlash .5s ease}
 .panel .ph b{font-weight:600;font-size:12.5px}
-.panel .ph .cnt{margin-left:auto;color:var(--faint);font-size:10.5px}
+.panel .ph .cnt{margin-left:auto;color:var(--faint);font-size:10.5px;font-feature-settings:"tnum"}
 .panel pre{margin:0;padding:14px;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word;
   color:var(--dim);font-size:10.6px;line-height:1.6;font-family:var(--mono)}
 .pf{display:flex;gap:9px;align-items:center;padding:11px 14px;border-top:1px solid var(--line-soft)}
@@ -104,18 +133,26 @@ header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-
 .copy:hover{transform:translateY(-1px)}
 .pf .hint{color:var(--faint);font-size:9.8px;line-height:1.4}
 
+/* мануал — glass-карточки с иконками */
 .manual{margin-top:26px}
-.manual h2{font-size:13px;font-weight:600;margin:0 0 9px;color:var(--ink)}
+.manual h2{font-size:13px;font-weight:600;margin:0 0 10px;color:var(--ink)}
 .man-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
-.man{border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;background:var(--glass);
+.man{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--glass);
   backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
-.man b{display:block;font-size:11.5px;margin-bottom:6px;color:var(--accent2)}
+.man-hd{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.man-icon{width:32px;height:32px;border-radius:50%;background:rgba(169,139,240,.08);
+  border:1px solid rgba(169,139,240,.2);display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--accent2);flex:0 0 32px}
+.man b{font-size:11.5px;color:var(--accent2)}
 .man p,.man li{color:var(--dim);font-size:10.6px;line-height:1.55;margin:0}
 .man ul{margin:0;padding-left:14px}
 .man code{color:var(--ink);background:rgba(0,0,0,.3);padding:1px 5px;border-radius:5px;font-size:10px}
 .man table{width:100%;border-collapse:collapse;font-size:10px;margin-top:4px}
 .man td{padding:2.5px 4px;color:var(--dim);border-top:1px solid var(--line-soft)}
 .man td:first-child{color:var(--ink);white-space:nowrap}
+.man-footer{margin-top:8px;font-size:10px}
+.man-footer a{color:var(--accent2);text-decoration:none;opacity:.8}
+.man-footer a:hover{opacity:1;text-decoration:underline}
 
 footer{margin-top:46px;border-top:1px solid var(--line-soft);padding-top:14px;display:flex;gap:12px;
   flex-wrap:wrap;align-items:center;color:var(--faint);font-size:10.5px}
@@ -129,13 +166,13 @@ footer .dog{margin-left:auto;color:var(--dim)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 @media(max-width:920px){.layout{grid-template-columns:1fr}.panel{position:static}.man-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.blocks{grid-template-columns:1fr}.hero h1{font-size:20px}}
+@media(max-width:600px){.blocks{grid-template-columns:1fr}.hero h1{font-size:18px}}
 </style>
 </head>
 <body>
 
 <header class="top"><div class="bar">
-  <img class="logo" src="aim-logo.png" alt="ai mindset">
+  <img class="logo" src="aim-logo-white.png" alt="ai mindset">
   <span class="mark">harness setup · <em>selfdev</em></span>
   <span class="right">
     <a class="chip" href="https://github.com/aPoWall/harness-setup-selfdev" target="_blank" rel="noopener">▸ репозиторий</a>
@@ -171,7 +208,7 @@ footer .dog{margin-left:auto;color:var(--dim)}
         <span class="lens" data-lens="okr">okr</span>
         <span class="lens" data-lens="gestalt">гештальт</span>
         <span class="lens-note" id="lens-note">линзы не выбраны — агент подберёт 2–3 на discovery из библиотеки 116</span>
-        <div class="lbl">блоки контура · ядро выбрано · «пример» показывает артефакт</div>
+        <div class="lbl">блоки контура · ядро выбрано · пример развёрнут</div>
       </div>
       <div class="blocks" id="blocks"></div>
 
@@ -179,7 +216,7 @@ footer .dog{margin-left:auto;color:var(--dim)}
         <h2>мануал · три вещи, которые держат контур</h2>
         <div class="man-grid">
           <div class="man">
-            <b>куда собирать части о себе</b>
+            <div class="man-hd"><div class="man-icon">¶</div><b>куда собирать части о себе</b></div>
             <table>
               <tr><td>about-me.md</td><td>роль, ппр 1/3/10 · local</td></tr>
               <tr><td>parts-map.md</td><td>части ifs · local-only, не цитировать</td></tr>
@@ -188,9 +225,10 @@ footer .dog{margin-left:auto;color:var(--dim)}
               <tr><td>insight_index.md</td><td>одна строка на инсайт</td></tr>
             </table>
             <p style="margin-top:6px">все файлы — в одной локальной папке <code>selfdev/</code>; заметки в notion копируются в чат фрагментами.</p>
+            <div class="man-footer"><a href="https://github.com/aPoWall/harness-setup-selfdev/blob/main/examples/README.md" target="_blank" rel="noopener">файлы о себе ↗</a></div>
           </div>
           <div class="man">
-            <b>naming convention</b>
+            <div class="man-hd"><div class="man-icon">{}</div><b>naming convention</b></div>
             <p>имя файла = адрес: агент находит контекст без поиска.</p>
             <p style="margin-top:5px"><code>{проект} {тип} описание – ГГГГ-ММ-ДД.md</code></p>
             <ul style="margin-top:6px">
@@ -199,19 +237,21 @@ footer .dog{margin-left:auto;color:var(--dim)}
               <li><code>selfdev {review} неделя – 2026-06-15.md</code></li>
             </ul>
             <p style="margin-top:6px">дата в конце · тип в скобках · новые папки создаёшь сам, руками.</p>
+            <div class="man-footer"><a href="https://github.com/aPoWall/harness-setup-selfdev/blob/main/SKILL.md" target="_blank" rel="noopener">naming в SKILL.md ↗</a></div>
           </div>
           <div class="man">
-            <b>как передаётся скилл</b>
+            <div class="man-hd"><div class="man-icon">→</div><b>как передаётся скилл</b></div>
             <p>этот дашборд формирует промпт → промпт ссылается на <code>SKILL.md</code> в репозитории → агент читает методику сам и ведёт по блокам → каждый блок оставляет файл-артефакт.</p>
             <p style="margin-top:6px">хочешь насовсем: <code>cp SKILL.md ~/.claude/skills/harness-setup-selfdev/</code> — и скилл переехал к тебе; дальше он вызывается без этой страницы.</p>
             <p style="margin-top:6px">форма каждого артефакта — в <code>examples/</code>: выдуманный участник «м.» от discovery до лога первой недели.</p>
+            <div class="man-footer"><a href="https://github.com/aPoWall/harness-setup-selfdev/blob/main/SKILL.md" target="_blank" rel="noopener">передача скилла ↗</a></div>
           </div>
         </div>
       </div>
     </div>
 
     <aside class="panel">
-      <div class="ph"><b>твой промпт</b><span class="cnt" id="cnt"></span></div>
+      <div class="ph" id="panel-ph"><b>твой промпт</b><span class="cnt" id="cnt"></span></div>
       <pre id="prompt"></pre>
       <div class="pf">
         <button class="copy" id="copy">скопировать промпт</button>
@@ -243,6 +283,35 @@ const IC = {
  multi:'<rect x="3" y="4" width="9" height="7" rx="1"/><rect x="13" y="8" width="8" height="6" rx="1"/><rect x="6" y="14" width="9" height="6" rx="1"/>',
  insight:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="2.6"/>',
  refresh:'<path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M20 3v4h-4"/>',
+};
+
+/* ссылки на примеры в GitHub */
+const BASE = 'https://github.com/aPoWall/harness-setup-selfdev/blob/main/';
+const GH = {
+ entry:   BASE+'examples/CLAUDE.md',
+ bounds:  BASE+'examples/harness-discovery.md',
+ inventory:BASE+'examples/harness-inventory.md',
+ skills:  BASE+'examples/skills/weekly-reflect/SKILL.md',
+ memory:  BASE+'examples/memory-rules.md',
+ rails:   BASE+'examples/decision-rails.md',
+ inspector:BASE+'examples/week-1-log.md',
+ insight: BASE+'examples/week-1-log.md',
+ multi:   BASE+'SKILL.md',
+ refresh: BASE+'SKILL.md',
+};
+
+/* имена файлов-артефактов для шапки терминала */
+const FNAME = {
+ entry:   'CLAUDE.md',
+ bounds:  'harness-discovery.md',
+ inventory:'harness-inventory.md',
+ skills:  'weekly-reflect/SKILL.md',
+ memory:  'memory-rules.md',
+ rails:   'decision-rails.md',
+ inspector:'week-1-log.md',
+ insight: 'week-1-log.md',
+ multi:   'SKILL.md',
+ refresh: 'SKILL.md',
 };
 
 const BLOCKS = [
@@ -300,15 +369,49 @@ BLOCKS.forEach((b,i)=>{
   const el=document.createElement('div');
   el.className='block'+(b.core?' core':'')+(S.on.has(b.id)?' on':'');
   el.style.animationDelay=(0.05*i+0.08)+'s';
+
+  // мини-терминал с превью примера
+  const exHtml=`<div class="ex-wrap" data-ex>
+    <div class="ex-bar">
+      <span class="ex-dot" style="background:rgba(255,90,90,.5)"></span>
+      <span class="ex-dot" style="background:rgba(255,200,0,.45)"></span>
+      <span class="ex-dot" style="background:rgba(50,210,100,.45)"></span>
+      <span class="ex-fname">${FNAME[b.id]||''}</span>
+    </div>
+    <div class="ex-body">
+      <pre class="ex" data-pre>${b.ex.replace(/</g,'&lt;')}</pre>
+      <div class="ex-fade" data-fade></div>
+    </div>
+  </div>`;
+
+  const ghLink=GH[b.id]
+    ?`<a class="gh-link" href="${GH[b.id]}" target="_blank" rel="noopener" data-gh>файл примера ↗</a>`:'';
+
   el.innerHTML=`<span class="sym">${S.on.has(b.id)?'◆':'◇'}</span>
-    <div class="bh"><svg class="ic" viewBox="0 0 24 24">${IC[b.ic]}</svg>
-    <div><h3>${b.t}</h3><p>${b.d}</p></div></div>
-    <div class="art">→ <b>${b.art}</b></div>
-    <span class="ex-t">пример ↓</span><pre class="ex">${b.ex.replace(/</g,'&lt;')}</pre>`;
+    <div class="bh">
+      <div class="icon-cap"><svg class="ic" viewBox="0 0 24 24">${IC[b.ic]}</svg></div>
+      <div><h3>${b.t}</h3><p>${b.d}</p></div>
+    </div>
+    <div class="art">
+      <span class="art-chip">→ <b>${b.art}</b></span>
+      ${ghLink}
+    </div>
+    ${exHtml}`;
+
+  // клик по терминальному превью → toggle open
+  el.querySelector('[data-ex]').addEventListener('click', e=>{
+    e.stopPropagation();
+    const pre=el.querySelector('[data-pre]');
+    pre.classList.toggle('open');
+  });
+
+  // ссылка github не переключает блок
+  if(el.querySelector('[data-gh]')){
+    el.querySelector('[data-gh]').addEventListener('click', e=>e.stopPropagation());
+  }
+
   el.addEventListener('click',e=>{
-    if(e.target.classList.contains('ex-t')){el.classList.toggle('exo');
-      e.target.textContent=el.classList.contains('exo')?'свернуть ↑':'пример ↓';return;}
-    if(e.target.closest('pre.ex'))return;
+    if(e.target.closest('[data-ex]'))return;
     S.on.has(b.id)?S.on.delete(b.id):S.on.add(b.id);
     el.classList.toggle('on');el.querySelector('.sym').textContent=S.on.has(b.id)?'◆':'◇';
     persist();render();});
@@ -361,11 +464,19 @@ ${numbered}
 начни сейчас: discovery, первые три вопроса.`;
 }
 
+let flashTimer=null;
+const panelPh=document.getElementById('panel-ph');
 const pre=document.getElementById('prompt'),cnt=document.getElementById('cnt');
 function render(){
   const p=compose();pre.textContent=p;
-  cnt.textContent=`${S.on.size} блоков · ${S.lenses.size} линз · ${p.length} зн.`;
+  cnt.textContent=`${S.on.size} блоков + ${S.lenses.size} линз · ${p.length} зн.`;
   lensNote.style.display=S.lenses.size?'none':'';
+  // вспышка панели промпта
+  panelPh.classList.remove('flash');
+  void panelPh.offsetWidth; // reflow
+  panelPh.classList.add('flash');
+  if(flashTimer)clearTimeout(flashTimer);
+  flashTimer=setTimeout(()=>panelPh.classList.remove('flash'),600);
 }
 render();
 
