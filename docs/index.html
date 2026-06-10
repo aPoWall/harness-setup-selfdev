@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>harness setup · selfdev — конфигуратор</title>
 <meta property="og:title" content="harness setup · selfdev">
-<meta property="og:description" content="выбери блоки своего ai-контура — получи один промпт, который соберёт его с тобой">
+<meta property="og:description" content="выбери блоки и линзы — получи один промпт, который соберёт твой контур">
 <meta property="og:image" content="https://raw.githubusercontent.com/aPoWall/harness-setup-selfdev/main/docs/cover.png">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg0:#0d0b14; --bg1:#130f1e; --bg2:#1a1426;
@@ -15,137 +15,143 @@
   --ink:#ece9f3; --dim:#9a96aa; --faint:#67637a;
   --line:rgba(255,255,255,.085); --line-soft:rgba(255,255,255,.05); --line-hi:rgba(255,255,255,.22);
   --accent:#5e9bf0; --accent-soft:rgba(94,155,240,.16); --accent2:#a98bf0; --accent2-soft:rgba(169,139,240,.16);
-  --ok:#5fb784;
   --blur:saturate(160%) blur(22px);
   --shadow:0 12px 34px -16px rgba(0,0,0,.72), 0 2px 8px -3px rgba(0,0,0,.5);
   --shadow-lg:0 30px 70px -24px rgba(0,0,0,.85);
-  --r:13px; --r-sm:9px;
-  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --r:12px; --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 *{box-sizing:border-box}
-html,body{margin:0;color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.55;
+html,body{margin:0;color:var(--ink);font-family:var(--mono);font-size:12.5px;line-height:1.5;
   -webkit-font-smoothing:antialiased;background:var(--bg0)}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
-  radial-gradient(720px 520px at 12% -6%, rgba(122,92,236,.22), transparent 60%),
-  radial-gradient(680px 520px at 92% 8%, rgba(94,155,240,.12), transparent 62%),
+  radial-gradient(720px 520px at 12% -6%, rgba(122,92,236,.20), transparent 60%),
+  radial-gradient(680px 520px at 92% 8%, rgba(94,155,240,.10), transparent 62%),
   linear-gradient(180deg, var(--bg1), var(--bg0) 45%, var(--bg2))}
-.orbs{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-.orbs i{position:absolute;border-radius:50%;filter:blur(64px);opacity:.5;mix-blend-mode:screen}
-.orbs i:nth-child(1){width:360px;height:360px;left:-70px;top:6%;background:radial-gradient(circle,#5e9bf0,transparent 70%);animation:drift1 28s ease-in-out infinite}
-.orbs i:nth-child(2){width:300px;height:300px;right:-50px;top:28%;background:radial-gradient(circle,#a98bf0,transparent 70%);animation:drift2 34s ease-in-out infinite}
-.orbs i:nth-child(3){width:280px;height:280px;left:46%;bottom:-70px;background:radial-gradient(circle,#56c8d8,transparent 70%);animation:drift3 31s ease-in-out infinite}
-@keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(64px,44px)}}
-@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-54px,64px)}}
-@keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(44px,-54px)}}
-@keyframes cardIn{from{opacity:0;transform:translateY(13px) scale(.984)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.orbs i{animation:none}.block,.panel,.hero{animation:none!important}}
+@keyframes cardIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.block,.panel,.hero{animation:none!important}}
 
-.wrap{max-width:1180px;margin:0 auto;padding:0 22px 90px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px 70px}
 header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  background:linear-gradient(180deg, rgba(13,11,20,.85), rgba(13,11,20,.55));
-  border-bottom:1px solid var(--line-soft)}
-.bar{max-width:1180px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:14px}
-.mark{font-weight:600;letter-spacing:.02em}
+  background:linear-gradient(180deg, rgba(13,11,20,.88), rgba(13,11,20,.6));border-bottom:1px solid var(--line-soft)}
+.bar{max-width:1200px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:12px}
+.logo{height:24px;width:auto;display:block;opacity:.92}
+.mark{font-weight:600;font-size:13px}
 .mark em{font-style:normal;color:var(--accent2)}
-.bar .sub{color:var(--faint);font-size:11.5px}
-.bar .right{margin-left:auto;display:flex;gap:8px;align-items:center}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--line);
-  border-radius:999px;color:var(--dim);text-decoration:none;font-size:11.5px;background:var(--glass-hi);
-  transition:.18s}
-.chip:hover{color:var(--ink);border-color:var(--line-hi);transform:translateY(-1px)}
+.bar .right{margin-left:auto;display:flex;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--line);
+  border-radius:999px;color:var(--dim);text-decoration:none;font-size:11px;background:var(--glass-hi);transition:.15s}
+.chip:hover{color:var(--ink);border-color:var(--line-hi)}
 
-.hero{padding:54px 0 10px;animation:cardIn .5s .05s both}
-.hero h1{margin:0 0 10px;font-size:30px;font-weight:600;letter-spacing:-.01em}
+.hero{padding:34px 0 4px;animation:cardIn .4s both}
+.hero h1{margin:0 0 7px;font-size:24px;font-weight:600;letter-spacing:-.01em}
 .hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--accent2));
   -webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{margin:0;color:var(--dim);max-width:640px}
-.steps{display:flex;gap:10px;margin:20px 0 6px;flex-wrap:wrap}
-.steps span{padding:7px 12px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:11.5px;background:var(--glass-hi)}
-.steps b{color:var(--accent2);font-weight:600;margin-right:6px}
+.hero p{margin:0;color:var(--dim);max-width:660px;font-size:12.5px}
+.steps{display:flex;gap:8px;margin:14px 0 2px;flex-wrap:wrap}
+.steps span{padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--dim);font-size:10.5px;background:var(--glass-hi)}
+.steps b{color:var(--accent2);font-weight:600;margin-right:5px}
 
-.layout{display:grid;grid-template-columns:1.25fr .95fr;gap:18px;margin-top:26px;align-items:start}
+.layout{display:grid;grid-template-columns:1.22fr .95fr;gap:16px;margin-top:20px;align-items:start}
 
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.lbl{width:100%;color:var(--faint);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;margin:7px 0 1px}
+.controls{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--glass-hi)}
-.seg button{font:inherit;font-size:11.5px;color:var(--dim);background:none;border:0;padding:7px 13px;cursor:pointer;transition:.15s}
+.seg button{font:inherit;font-size:11px;color:var(--dim);background:none;border:0;padding:6px 12px;cursor:pointer;transition:.15s}
 .seg button.on{background:var(--accent2-soft);color:var(--ink)}
-.lens{font:inherit;font-size:11.5px;color:var(--dim);background:var(--glass-hi);border:1px solid var(--line);
-  border-radius:999px;padding:7px 12px;cursor:pointer;transition:.15s}
+.lens{font:inherit;font-size:11px;color:var(--dim);background:var(--glass-hi);border:1px solid var(--line);
+  border-radius:999px;padding:6px 11px;cursor:pointer;transition:.15s}
 .lens:hover{border-color:var(--line-hi);color:var(--ink)}
 .lens.on{background:var(--accent-soft);border-color:rgba(94,155,240,.5);color:var(--ink)}
-.lbl{width:100%;color:var(--faint);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin:8px 0 2px}
+.lens.on::before{content:"+ ";color:var(--accent)}
+.lens-note{width:100%;color:var(--faint);font-size:10.5px;margin-top:2px}
 
-.blocks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.block{position:relative;border:1px solid var(--line);border-radius:var(--r);padding:14px 15px 12px;
+.blocks{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.block{position:relative;border:1px solid var(--line);border-radius:var(--r);padding:12px 13px 10px;
   background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  cursor:pointer;transition:transform .2s, box-shadow .2s, border-color .2s;animation:cardIn .45s both}
+  cursor:pointer;transition:transform .18s, box-shadow .18s, border-color .18s;animation:cardIn .35s both}
 .block:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--line-hi)}
-.block .sym{position:absolute;top:13px;right:13px;color:var(--faint);transition:.2s;font-size:13px}
-.block h3{margin:0 0 4px;font-size:13px;font-weight:600;padding-right:22px}
-.block p{margin:0;color:var(--dim);font-size:11.5px;line-height:1.5}
-.block .art{margin-top:8px;color:var(--faint);font-size:10.5px}
+.block .bh{display:flex;gap:10px;align-items:flex-start}
+.block svg.ic{flex:0 0 34px;width:34px;height:34px;margin-top:1px}
+.block svg.ic *{stroke:var(--faint);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;transition:.2s}
+.block.on svg.ic *{stroke:var(--accent2)}
+.block h3{margin:0 0 2px;font-size:12.5px;font-weight:600;line-height:1.3}
+.block p{margin:0;color:var(--dim);font-size:10.8px;line-height:1.45}
+.block .art{margin-top:6px;color:var(--faint);font-size:10px}
 .block .art b{color:var(--dim);font-weight:500}
-.block.on{border-color:rgba(169,139,240,.55);background:linear-gradient(180deg, rgba(169,139,240,.10), var(--glass));
-  box-shadow:0 0 0 1px rgba(169,139,240,.25), var(--shadow)}
+.block .sym{position:absolute;top:11px;right:12px;color:var(--faint);font-size:12px;transition:.2s}
+.block.on{border-color:rgba(169,139,240,.55);background:linear-gradient(180deg, rgba(169,139,240,.09), var(--glass));
+  box-shadow:0 0 0 1px rgba(169,139,240,.22)}
 .block.on .sym{color:var(--accent2)}
-.block.core::after{content:"ядро";position:absolute;bottom:11px;right:13px;color:var(--faint);font-size:9.5px;letter-spacing:.1em}
+.block .ex-t{margin-top:7px;font-size:10px;color:var(--accent);cursor:pointer;width:fit-content}
+.block .ex-t:hover{text-decoration:underline}
+.block pre.ex{display:none;margin:7px 0 0;padding:9px 10px;background:rgba(0,0,0,.32);border:1px solid var(--line-soft);
+  border-radius:8px;color:var(--dim);font-size:10px;line-height:1.55;white-space:pre-wrap;font-family:var(--mono)}
+.block.exo pre.ex{display:block}
+.block.core::after{content:"ядро";position:absolute;bottom:9px;right:12px;color:var(--faint);font-size:8.5px;letter-spacing:.1em}
 
-.panel{position:sticky;top:74px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+.panel{position:sticky;top:62px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
   background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  box-shadow:var(--shadow-lg);animation:cardIn .5s .15s both}
-.panel .ph{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line-soft)}
-.panel .ph b{font-weight:600}
-.panel .ph .cnt{margin-left:auto;color:var(--faint);font-size:11px}
-.panel pre{margin:0;padding:16px;max-height:430px;overflow:auto;white-space:pre-wrap;word-break:break-word;
-  color:var(--dim);font-size:11.3px;line-height:1.62;font-family:var(--mono)}
-.panel pre::selection{background:var(--accent2-soft)}
-.pf{display:flex;gap:10px;align-items:center;padding:13px 16px;border-top:1px solid var(--line-soft)}
-.copy{font:inherit;font-weight:600;font-size:12.5px;color:#0d0b14;border:0;cursor:pointer;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:10px;padding:11px 18px;
+  box-shadow:var(--shadow-lg);animation:cardIn .4s .1s both}
+.panel .ph{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--line-soft)}
+.panel .ph b{font-weight:600;font-size:12.5px}
+.panel .ph .cnt{margin-left:auto;color:var(--faint);font-size:10.5px}
+.panel pre{margin:0;padding:14px;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word;
+  color:var(--dim);font-size:10.6px;line-height:1.6;font-family:var(--mono)}
+.pf{display:flex;gap:9px;align-items:center;padding:11px 14px;border-top:1px solid var(--line-soft)}
+.copy{font:inherit;font-weight:600;font-size:12px;color:#0d0b14;border:0;cursor:pointer;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:9px;padding:10px 16px;
   transition:transform .15s, box-shadow .2s;box-shadow:0 8px 24px -10px rgba(169,139,240,.55)}
-.copy:hover{transform:translateY(-1px);box-shadow:0 12px 30px -10px rgba(169,139,240,.7)}
-.copy:active{transform:translateY(0)}
-.pf .hint{color:var(--faint);font-size:10.5px;line-height:1.45}
+.copy:hover{transform:translateY(-1px)}
+.pf .hint{color:var(--faint);font-size:9.8px;line-height:1.4}
 
-footer{margin-top:70px;border-top:1px solid var(--line-soft);padding-top:18px;display:flex;gap:14px;
-  flex-wrap:wrap;align-items:center;color:var(--faint);font-size:11px}
+.manual{margin-top:26px}
+.manual h2{font-size:13px;font-weight:600;margin:0 0 9px;color:var(--ink)}
+.man-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.man{border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;background:var(--glass);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.man b{display:block;font-size:11.5px;margin-bottom:6px;color:var(--accent2)}
+.man p,.man li{color:var(--dim);font-size:10.6px;line-height:1.55;margin:0}
+.man ul{margin:0;padding-left:14px}
+.man code{color:var(--ink);background:rgba(0,0,0,.3);padding:1px 5px;border-radius:5px;font-size:10px}
+.man table{width:100%;border-collapse:collapse;font-size:10px;margin-top:4px}
+.man td{padding:2.5px 4px;color:var(--dim);border-top:1px solid var(--line-soft)}
+.man td:first-child{color:var(--ink);white-space:nowrap}
+
+footer{margin-top:46px;border-top:1px solid var(--line-soft);padding-top:14px;display:flex;gap:12px;
+  flex-wrap:wrap;align-items:center;color:var(--faint);font-size:10.5px}
 footer a{color:var(--dim);text-decoration:none;border-bottom:1px solid var(--line)}
 footer a:hover{color:var(--ink)}
 footer .dog{margin-left:auto;color:var(--dim)}
 
-.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,8px);opacity:0;pointer-events:none;
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,8px);opacity:0;pointer-events:none;
   background:var(--glass-strong);backdrop-filter:var(--blur);border:1px solid var(--line);border-radius:999px;
-  padding:10px 18px;font-size:12px;transition:.25s;box-shadow:var(--shadow)}
+  padding:9px 16px;font-size:11.5px;transition:.25s;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
-@media(max-width:920px){
-  .layout{grid-template-columns:1fr}
-  .panel{position:static}
-  .blocks{grid-template-columns:1fr 1fr}
-}
-@media(max-width:600px){.blocks{grid-template-columns:1fr}.hero h1{font-size:24px}}
+@media(max-width:920px){.layout{grid-template-columns:1fr}.panel{position:static}.man-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.blocks{grid-template-columns:1fr}.hero h1{font-size:20px}}
 </style>
 </head>
 <body>
-<div class="orbs"><i></i><i></i><i></i></div>
 
 <header class="top"><div class="bar">
+  <img class="logo" src="aim-logo.png" alt="ai mindset">
   <span class="mark">harness setup · <em>selfdev</em></span>
-  <span class="sub">агент = модель + харнес</span>
   <span class="right">
     <a class="chip" href="https://github.com/aPoWall/harness-setup-selfdev" target="_blank" rel="noopener">▸ репозиторий</a>
     <a class="chip" href="https://github.com/aPoWall/harness-setup-selfdev/blob/main/examples/README.md" target="_blank" rel="noopener">◇ пример результата</a>
+    <a class="chip" href="https://apowall.github.io/relationship-os/" target="_blank" rel="noopener">◎ relationship-os</a>
   </span>
 </div></header>
 
 <div class="wrap">
   <section class="hero">
-    <h1>собери свой контур — <em>одним промптом</em></h1>
-    <p>выбери блоки личного ai-харнеса для практики саморазвития. справа соберётся один большой промпт со ссылкой на методику — вставь его агенту, и он проведёт тебя по блокам, шаг за шагом.</p>
+    <h1>собери контур — <em>одним промптом</em></h1>
+    <p>отметь блоки и линзы своей практики. промпт справа пересоберётся под выбор: вставь его агенту — он прочитает методику из репозитория и поведёт по блокам, по одному.</p>
     <div class="steps">
-      <span><b>01</b>выбери блоки</span>
+      <span><b>01</b>блоки + линзы</span>
       <span><b>02</b>скопируй промпт</span>
-      <span><b>03</b>вставь в claude code — и поехали</span>
+      <span><b>03</b>вставь агенту — он ведёт</span>
     </div>
   </section>
 
@@ -157,16 +163,51 @@ footer .dog{margin-left:auto;color:var(--dim)}
           <button data-lv="cc" class="on">claude code / codex</button>
           <button data-lv="chat">любой чат-бот</button>
         </div>
-        <div class="lbl">твои линзы · можно пропустить — агент подберёт</div>
+        <div class="lbl">линзы практики · каждая добавляет в промпт свой блок</div>
         <span class="lens" data-lens="ifs">ifs · части</span>
-        <span class="lens" data-lens="журнал решений">журнал решений</span>
-        <span class="lens" data-lens="утренние страницы">утренние страницы</span>
-        <span class="lens" data-lens="випассана">випассана</span>
+        <span class="lens" data-lens="rails">журнал решений</span>
+        <span class="lens" data-lens="pages">утренние страницы</span>
+        <span class="lens" data-lens="vipassana">медитация · тело</span>
         <span class="lens" data-lens="okr">okr</span>
-        <span class="lens" data-lens="гештальт">гештальт</span>
-        <div class="lbl">блоки контура · ядро уже выбрано</div>
+        <span class="lens" data-lens="gestalt">гештальт</span>
+        <span class="lens-note" id="lens-note">линзы не выбраны — агент подберёт 2–3 на discovery из библиотеки 116</span>
+        <div class="lbl">блоки контура · ядро выбрано · «пример» показывает артефакт</div>
       </div>
       <div class="blocks" id="blocks"></div>
+
+      <div class="manual">
+        <h2>мануал · три вещи, которые держат контур</h2>
+        <div class="man-grid">
+          <div class="man">
+            <b>куда собирать части о себе</b>
+            <table>
+              <tr><td>about-me.md</td><td>роль, ппр 1/3/10 · local</td></tr>
+              <tr><td>parts-map.md</td><td>части ifs · local-only, не цитировать</td></tr>
+              <tr><td>memory-rules.md</td><td>хранить / спрашивать / никогда</td></tr>
+              <tr><td>decision-rails.md</td><td>решения с датой ревью</td></tr>
+              <tr><td>insight_index.md</td><td>одна строка на инсайт</td></tr>
+            </table>
+            <p style="margin-top:6px">все файлы — в одной локальной папке <code>selfdev/</code>; заметки в notion копируются в чат фрагментами.</p>
+          </div>
+          <div class="man">
+            <b>naming convention</b>
+            <p>имя файла = адрес: агент находит контекст без поиска.</p>
+            <p style="margin-top:5px"><code>{проект} {тип} описание – ГГГГ-ММ-ДД.md</code></p>
+            <ul style="margin-top:6px">
+              <li><code>selfdev {prep} разговор с к. – 2026-06-13.md</code></li>
+              <li><code>selfdev {debrief} после терапии – 2026-06-17.md</code></li>
+              <li><code>selfdev {review} неделя – 2026-06-15.md</code></li>
+            </ul>
+            <p style="margin-top:6px">дата в конце · тип в скобках · новые папки создаёшь сам, руками.</p>
+          </div>
+          <div class="man">
+            <b>как передаётся скилл</b>
+            <p>этот дашборд формирует промпт → промпт ссылается на <code>SKILL.md</code> в репозитории → агент читает методику сам и ведёт по блокам → каждый блок оставляет файл-артефакт.</p>
+            <p style="margin-top:6px">хочешь насовсем: <code>cp SKILL.md ~/.claude/skills/harness-setup-selfdev/</code> — и скилл переехал к тебе; дальше он вызывается без этой страницы.</p>
+            <p style="margin-top:6px">форма каждого артефакта — в <code>examples/</code>: выдуманный участник «м.» от discovery до лога первой недели.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <aside class="panel">
@@ -174,14 +215,14 @@ footer .dog{margin-left:auto;color:var(--dim)}
       <pre id="prompt"></pre>
       <div class="pf">
         <button class="copy" id="copy">скопировать промпт</button>
-        <span class="hint">промпт ссылается на репозиторий — агент прочитает методику и поведёт по блокам с подтверждением после каждого</span>
+        <span class="hint">промпт меняется от выбора: блоки = шаги, линзы = свои файлы и правила</span>
       </div>
     </aside>
   </div>
 
   <footer>
     <a href="https://github.com/aPoWall/harness-setup-selfdev" target="_blank" rel="noopener">github.com/aPoWall/harness-setup-selfdev</a>
-    <a href="https://github.com/aPoWall/relationship-os" target="_blank" rel="noopener">relationship-os — пример продукта на контуре</a>
+    <a href="https://apowall.github.io/relationship-os/" target="_blank" rel="noopener">relationship-os — продукт на таком контуре</a>
     <span>сделано контуром, который здесь описан</span>
     <span class="dog">◎ {the_doG} ◎</span>
   </footer>
@@ -190,107 +231,151 @@ footer .dog{margin-left:auto;color:var(--dim)}
 <div class="toast" id="toast">промпт скопирован — вставь агенту</div>
 
 <script>
+/* svg-метафоры блоков: минимальная линия, 24×24 viewBox */
+const IC = {
+ entry:'<rect x="4" y="3" width="13" height="18" rx="2"/><path d="M13 12h8M18 9l3 3-3 3"/>',
+ bounds:'<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/>',
+ inventory:'<rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><path d="M15 18l2 2 4-4"/>',
+ skills:'<path d="M12 3l4 5-4 5-4-5z"/><path d="M6 14l3 4-3 4M18 14l-3 4 3 4" stroke-dasharray="2,2"/>',
+ memory:'<path d="M4 5h16M4 9h16M4 13h10"/><rect x="4" y="16" width="9" height="5" rx="1"/>',
+ rails:'<path d="M5 21V11c0-3 2-5 5-5h9"/><path d="M16 3l4 3-4 3"/><path d="M5 11h7" stroke-dasharray="2,2"/><circle cx="5" cy="21" r="1.4"/>',
+ inspector:'<circle cx="10" cy="10" r="6"/><path d="M15 15l5 5"/><path d="M7 10h6M9 7.5h3" stroke-dasharray="2,2"/>',
+ multi:'<rect x="3" y="4" width="9" height="7" rx="1"/><rect x="13" y="8" width="8" height="6" rx="1"/><rect x="6" y="14" width="9" height="6" rx="1"/>',
+ insight:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="2.6"/>',
+ refresh:'<path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M20 3v4h-4"/>',
+};
+
 const BLOCKS = [
- {id:'entry', core:1, t:'точка входа · CLAUDE.md', d:'кто ты, твои файлы, как тебе помогать. читается в начале каждой сессии.', art:'~/.claude/CLAUDE.md ≤60 строк',
-  ins:'собери мой CLAUDE.md: задай 7 вопросов (роль, практика, задачи, файлы, стиль ответов), покажи файл до сохранения, держи его короче 60 строк'},
- {id:'bounds', core:1, t:'карта границ', d:'можно · спрашивать · никогда. материал терапии не покидает машину.', art:'permissions-блок в CLAUDE.md',
-  ins:'сними мою карту границ (public / local / ask_first / never) и запиши её блоком «границы — никогда без подтверждения» в CLAUDE.md'},
- {id:'inventory', core:0, t:'инвентарь', d:'70% обычно уже есть: заметки, промпты, артефакты практики. строим только пустое.', art:'harness-inventory.md · gap-таблица',
-  ins:'проведи инвентарь: что у меня уже есть по 7 слоям (context / tools / permissions / evals / evidence / lifecycle / owner) — gap-таблица в harness-inventory.md'},
- {id:'skills', core:1, t:'первые 3 скилла', d:'из живых повторов, не сто на всякий случай. повторяемость + отчуждаемость.', art:'~/.claude/skills/…/SKILL.md ×3',
-  ins:'выбери со мной 3 задачи по критериям повторяемость+отчуждаемость и оформи каждую как скилл (frontmatter name + description-триггеры, тело — шаги и формат); первый прогони на живой задаче сразу'},
- {id:'memory', core:0, t:'память + адресация', d:'что хранить, что спрашивать, что никогда. имя файла = адрес.', art:'memory-rules.md + naming convention',
-  ins:'составь мои memory-rules (хранить / ask_first / never + право на забывание) и зафиксируй naming convention для файлов контура'},
- {id:'rails', core:0, t:'журнал решений', d:'варианты, препятствие, if-then, дата ревью. решения двигаются, когда у них есть дата.', art:'decision-rails.md',
-  ins:'заведи decision-rails.md и проведи одно моё реальное зависшее решение по форме: часть-против → обратимость → ≥3 варианта → woop-препятствие → if-then → дата ревью'},
- {id:'inspector', core:0, t:'session inspector lite', d:'сессии за неделю → темы → что брошено → handoff-промпты. взгляд на себя через следы.', art:'sessions-review.html',
-  ins:'собери обзор моих сессий из ~/.claude/projects за 7 дней: темы, незакрытое, handoff-промпт на каждую, паттерны — одностраничный html'},
- {id:'multi', core:0, t:'мультитерминальный протокол', d:'окно = задача · handoff на половине контекста · субагенты только для ресёрча.', art:'правило в CLAUDE.md',
-  ins:'объясни мне мультитерминальный протокол на моих задачах и добавь короткое правило в CLAUDE.md (окно=задача, handoff на 50%, субагенты — ресёрч)'},
- {id:'insight', core:0, t:'insight_index', d:'копилка инсайтов: одна строка — дата · паттерн · след-основание.', art:'insight_index.md',
-  ins:'создай пустой insight_index.md и научи меня правилу одной строки: дата · паттерн · след; первые скиллы пишут туда'},
- {id:'refresh', core:1, t:'ритуал refresh', d:'15 минут раз в 1–2 недели: что не использовалось, что повторяю руками, где агент ошибается.', art:'событие в календаре + чеклист',
-  ins:'настрой ритуал refresh: чеклист из 4 вопросов + напомни мне поставить повторяющееся событие в календарь; первый refresh — сразу после первых трёх скиллов'},
+ {id:'entry', core:1, ic:'entry', t:'точка входа · CLAUDE.md', d:'кто ты, файлы, как помогать. читается каждой сессией.', art:'~/.claude/CLAUDE.md ≤60 строк',
+  ins:'собери мой CLAUDE.md: 7 вопросов (роль, практика, задачи, файлы, стиль), покажи файл до сохранения, ≤60 строк',
+  ex:'# контур · м.\n## кто я\nпродакт-лид, практика: ifs + страницы…\n## мои файлы\n- ппр: selfdev/about-me.md\n- части: parts-map.md — НЕ цитировать\n## границы — никогда без подтверждения\n- ничего не отправлять наружу'},
+ {id:'bounds', core:1, ic:'bounds', t:'карта границ', d:'можно · спрашивать · никогда. терапия не покидает машину.', art:'permissions-блок в CLAUDE.md',
+  ins:'сними карту границ (public / local / ask_first / never) и запиши блоком «границы» в CLAUDE.md',
+  ex:'| данные              | gate        |\n| цели, трекинг       | local       |\n| дневник             | local-only  |\n| карта частей        | ask_first   |\n| третьи лица         | do_not_store|\n| наружу (письма)     | never       |'},
+ {id:'inventory', core:0, ic:'inventory', t:'инвентарь', d:'70% уже есть. строим только пустые ячейки.', art:'harness-inventory.md · gap-таблица',
+  ins:'проведи инвентарь по 7 слоям (context/tools/permissions/evals/evidence/lifecycle/owner) → gap-таблица',
+  ex:'| слой        | есть          | шаг        |\n| context     | about-me (d4) | подключить |\n| permissions | в голове      | в CLAUDE.md|\n| lifecycle   | —             | ритуал в кал.|'},
+ {id:'skills', core:1, ic:'skills', t:'первые 3 скилла', d:'из живых повторов. повторяемость + отчуждаемость.', art:'~/.claude/skills/…/SKILL.md ×3',
+  ins:'выбери 3 задачи (повторяемость+отчуждаемость), оформи скиллами (description = только триггеры), первый прогони сразу',
+  ex:'---\nname: weekly-reflect\ndescription: "Use when разбор недели…"\n---\n# шаги: следы → паттерн → вопрос\n# не использовать: в остром состоянии'},
+ {id:'memory', core:0, ic:'memory', t:'память + адресация', d:'что хранить, что никогда. имя файла = адрес.', art:'memory-rules.md + naming',
+  ins:'составь memory-rules (хранить / ask_first / never / право на забывание) + зафиксируй naming convention',
+  ex:'хранить: цели, трекинг, исходы решений\nask_first: выводы агента о паттернах\nникогда: терапия дословно, третьи лица\nпо «забудь это» — удалить без следа'},
+ {id:'rails', core:0, ic:'rails', t:'журнал решений', d:'решения двигаются, когда у них есть дата ревью.', art:'decision-rails.md',
+  ins:'заведи decision-rails.md, проведи одно зависшее решение: часть-против → обратимость → ≥3 варианта → woop → if-then → дата',
+  ex:'## разговор с к.\nчасть против: «дипломат»\nварианты: письмо → разговор · фасилитатор · ничего\nif-then: ловлю смягчение → читаю якорь\nreview: 2026-06-20 · открыт'},
+ {id:'inspector', core:0, ic:'inspector', t:'session inspector lite', d:'сессии → темы → что брошено → handoff.', art:'sessions-review.html',
+  ins:'собери обзор сессий из ~/.claude/projects за 7 дней: темы, незакрытое, handoff-промпты, паттерны → html',
+  ex:'| тема     | осталось      | handoff   |\n| контур   | евалы в вс    | «открой…» |\n| разговор | debrief вт    | «прочитай…»|\nпаттерн: бросаю всё бездатное'},
+ {id:'multi', core:0, ic:'multi', t:'мультитерминал', d:'окно = задача · handoff на 50% · субагенты = ресёрч.', art:'правило в CLAUDE.md',
+  ins:'объясни мультитерминальный протокол на моих задачах, добавь правило в CLAUDE.md',
+  ex:'окно 1 — проект, исполнение\nокно 2 — ресёрч (субагент)\nконтекст 50% → «собери handoff»\n→ новое окно → вставил → дальше'},
+ {id:'insight', core:0, ic:'insight', t:'insight_index', d:'копилка: дата · паттерн · след-основание.', art:'insight_index.md',
+  ins:'создай insight_index.md, правило одной строки: дата · паттерн · след; скиллы пишут сюда',
+  ex:'2026-06-15 · решения двигаются, когда\nесть дата · след: 3 закрытых — все с ревью'},
+ {id:'refresh', core:1, ic:'refresh', t:'ритуал refresh', d:'15 минут раз в 1–2 недели. контур против музея.', art:'событие в календаре + чеклист',
+  ins:'настрой refresh: чеклист 4 вопросов + повторяющееся событие; первый — после первых трёх скиллов',
+  ex:'□ что не использовалось месяц → удалить\n□ что трижды руками → в скилл\n□ где агент ошибся ×3 → правило\n□ границы ещё верные?'},
 ];
-const REPO = 'https://github.com/aPoWall/harness-setup-selfdev';
-const RAW  = 'https://raw.githubusercontent.com/aPoWall/harness-setup-selfdev/main/SKILL.md';
 
-const S = { lv:'cc', lenses:new Set(), on:new Set(BLOCKS.filter(b=>b.core).map(b=>b.id)) };
-try{ const saved = JSON.parse(localStorage.getItem('hcfg_v1')||'null');
-  if(saved){ S.lv=saved.lv||'cc'; S.lenses=new Set(saved.lenses||[]); S.on=new Set(saved.on&&saved.on.length?saved.on:[...S.on]);} }catch(e){}
+const LENSES = {
+ ifs:{label:'ifs · части', ins:'линза ifs: заведи parts-map.md (gate: local-only · ask_first) — имя части · роль · триггер · чего боится · что защищает; в CLAUDE.md правило «учитывать, не цитировать»; debrief после сессии пишет сюда', q:'терапия и части'},
+ rails:{label:'журнал решений', ins:'линза решений: decision-rails.md обязателен — каждое живое решение по форме часть-против → обратимость → ≥3 варианта → woop → if-then → дата ревью; недельный разбор начинается с просроченных ревью', q:'зависшие решения'},
+ pages:{label:'утренние страницы', ins:'линза страниц: маршрут journal-distill — фрагмент страниц → структура → одна строка в insight_index.md; страницы остаются на бумаге, в контур попадает только дистиллят', q:'дневник и страницы'},
+ vipassana:{label:'медитация · тело', ins:'линза тела: practice-streak — одна строка-отметка в день с честными провалами; привязка к существующей привычке; никаких оценок, только след', q:'телесная практика'},
+ okr:{label:'okr', ins:'линза okr: секция quarterly_goals в about-me.md; недельный трекинг сверяет неделю с квартальными ключевыми результатами', q:'квартальные цели'},
+ gestalt:{label:'гештальт', ins:'линза гештальта: unfinished_gestalts.md — одна незакрытая ситуация за раз; conversation-prep подхватывает её как тему трудного разговора', q:'незакрытые ситуации'},
+};
 
-function persist(){ try{localStorage.setItem('hcfg_v1', JSON.stringify({lv:S.lv, lenses:[...S.lenses], on:[...S.on]}))}catch(e){} }
+const REPO='https://github.com/aPoWall/harness-setup-selfdev';
+const RAW='https://raw.githubusercontent.com/aPoWall/harness-setup-selfdev/main/SKILL.md';
 
-const grid = document.getElementById('blocks');
+const S={lv:'cc',lenses:new Set(),on:new Set(BLOCKS.filter(b=>b.core).map(b=>b.id))};
+try{const sv=JSON.parse(localStorage.getItem('hcfg_v2')||'null');
+  if(sv){S.lv=sv.lv||'cc';S.lenses=new Set(sv.lenses||[]);S.on=new Set(sv.on&&sv.on.length?sv.on:[...S.on]);}}catch(e){}
+function persist(){try{localStorage.setItem('hcfg_v2',JSON.stringify({lv:S.lv,lenses:[...S.lenses],on:[...S.on]}))}catch(e){}}
+
+const grid=document.getElementById('blocks');
 BLOCKS.forEach((b,i)=>{
-  const el = document.createElement('div');
-  el.className = 'block'+(b.core?' core':'')+(S.on.has(b.id)?' on':'');
-  el.style.animationDelay = (0.06*i+0.1)+'s';
-  el.innerHTML = `<span class="sym">${S.on.has(b.id)?'◆':'◇'}</span><h3>${b.t}</h3><p>${b.d}</p><div class="art">→ <b>${b.art}</b></div>`;
-  el.onclick = ()=>{ S.on.has(b.id)?S.on.delete(b.id):S.on.add(b.id);
-    el.classList.toggle('on'); el.querySelector('.sym').textContent = S.on.has(b.id)?'◆':'◇';
-    persist(); render(); };
+  const el=document.createElement('div');
+  el.className='block'+(b.core?' core':'')+(S.on.has(b.id)?' on':'');
+  el.style.animationDelay=(0.05*i+0.08)+'s';
+  el.innerHTML=`<span class="sym">${S.on.has(b.id)?'◆':'◇'}</span>
+    <div class="bh"><svg class="ic" viewBox="0 0 24 24">${IC[b.ic]}</svg>
+    <div><h3>${b.t}</h3><p>${b.d}</p></div></div>
+    <div class="art">→ <b>${b.art}</b></div>
+    <span class="ex-t">пример ↓</span><pre class="ex">${b.ex.replace(/</g,'&lt;')}</pre>`;
+  el.addEventListener('click',e=>{
+    if(e.target.classList.contains('ex-t')){el.classList.toggle('exo');
+      e.target.textContent=el.classList.contains('exo')?'свернуть ↑':'пример ↓';return;}
+    if(e.target.closest('pre.ex'))return;
+    S.on.has(b.id)?S.on.delete(b.id):S.on.add(b.id);
+    el.classList.toggle('on');el.querySelector('.sym').textContent=S.on.has(b.id)?'◆':'◇';
+    persist();render();});
   grid.appendChild(el);
 });
 
 document.querySelectorAll('#seg button').forEach(btn=>{
   if(btn.dataset.lv===S.lv){document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');}
-  btn.onclick=()=>{ S.lv=btn.dataset.lv;
-    document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===btn));
-    persist(); render(); };
+  btn.onclick=()=>{S.lv=btn.dataset.lv;
+    document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===btn));persist();render();};
 });
+const lensNote=document.getElementById('lens-note');
 document.querySelectorAll('.lens').forEach(ch=>{
-  if(S.lenses.has(ch.dataset.lens)) ch.classList.add('on');
-  ch.onclick=()=>{ const k=ch.dataset.lens;
+  if(S.lenses.has(ch.dataset.lens))ch.classList.add('on');
+  ch.onclick=()=>{const k=ch.dataset.lens;
     S.lenses.has(k)?S.lenses.delete(k):S.lenses.add(k);
-    ch.classList.toggle('on'); persist(); render(); };
+    ch.classList.toggle('on');persist();render();};
 });
 
 function compose(){
-  const sel = BLOCKS.filter(b=>S.on.has(b.id));
-  const lv = S.lv==='cc'
-    ? 'claude code / codex cli — веди через файлы и скиллы, артефакты сохраняй сам'
-    : 'обычный чат-бот без файловой системы — артефакты выдавай текстом, я сохраняю их в заметки руками';
-  const lenses = S.lenses.size
-    ? [...S.lenses].join(', ')
-    : 'не выбраны — подбери со мной 2–3 на discovery из frameworks-digest.md репозитория';
-  const blocks = sel.map((b,i)=>`${i+1}. ${b.t} — ${b.ins}. артефакт: ${b.art}.`).join('\n');
+  const sel=BLOCKS.filter(b=>S.on.has(b.id));
+  const ls=[...S.lenses].map(k=>LENSES[k]).filter(Boolean);
+  const lv=S.lv==='cc'
+    ?'claude code / codex cli — веди через файлы и скиллы, артефакты сохраняй сам'
+    :'обычный чат-бот без файловой системы — артефакты выдавай текстом, я сохраняю в заметки руками';
+  const steps=[];
+  sel.forEach(b=>steps.push(`${b.t} — ${b.ins}. артефакт: ${b.art}.`));
+  ls.forEach(l=>steps.push(`${l.ins}.`));
+  const numbered=steps.map((s,i)=>`${i+1}. ${s}`).join('\n');
+  const discovery=ls.length
+    ?`начни с discovery: моя практика (${ls.map(l=>l.q).join(', ')}), 5–7 регулярных ai-задач, границы приватности`
+    :'начни с discovery: моя практика, 5–7 регулярных ai-задач, границы приватности; подбери со мной 2–3 линзы из frameworks-digest.md репозитория';
   return `ты — проводник по сборке моего личного ai-харнеса для практики саморазвития.
 
 методика: ${REPO}
-прочитай SKILL.md (raw: ${RAW}). если сети нет — попроси меня вставить его текст. форма всех артефактов — в examples/ того же репозитория (синтетический участник «м.»).
+прочитай SKILL.md (raw: ${RAW}); если сети нет — попроси меня вставить текст. форма артефактов — examples/ того же репозитория (синтетический участник «м.»).
 
 мой уровень: ${lv}.
-мои линзы: ${lenses}.
 
-собери со мной выбранные блоки, строго по одному, с моим подтверждением после каждого:
-${blocks}
+собери со мной выбранное, строго по одному пункту, с моим подтверждением после каждого:
+${numbered}
 
 правила процесса:
-— начни с короткого discovery: моя практика, 5–7 регулярных ai-задач, границы приватности;
-— каждый блок завершается артефактом; показывай его мне до сохранения;
+— ${discovery};
+— все файлы контура — в локальной папке selfdev/; имена-следы по naming convention {проект} {тип} описание – ГГГГ-ММ-ДД.md;
+— каждый пункт завершается артефактом; показывай его мне до сохранения;
 — материал терапии и глубокие личные данные — local-only и ask_first; ничего не уходит наружу без моего явного «да»;
-— вопросы вместо интерпретаций, без диагнозов и мотивационного тона;
-— если блок мне не нужен — пропускаем без уговоров.
+— вопросы вместо интерпретаций, без диагнозов и мотивационного тона; пункт не нужен — пропускаем без уговоров.
 
 начни сейчас: discovery, первые три вопроса.`;
 }
 
-const pre = document.getElementById('prompt'), cnt = document.getElementById('cnt');
+const pre=document.getElementById('prompt'),cnt=document.getElementById('cnt');
 function render(){
-  const p = compose();
-  pre.textContent = p;
-  cnt.textContent = `${S.on.size} блоков · ${p.length} зн.`;
+  const p=compose();pre.textContent=p;
+  cnt.textContent=`${S.on.size} блоков · ${S.lenses.size} линз · ${p.length} зн.`;
+  lensNote.style.display=S.lenses.size?'none':'';
 }
 render();
 
-const toast = document.getElementById('toast');
-document.getElementById('copy').onclick = async ()=>{
-  const p = compose();
-  try{ await navigator.clipboard.writeText(p); }
-  catch(e){ const ta=document.createElement('textarea'); ta.value=p; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy'); ta.remove(); }
-  toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200);
+const toast=document.getElementById('toast');
+document.getElementById('copy').onclick=async()=>{
+  const p=compose();
+  try{await navigator.clipboard.writeText(p);}
+  catch(e){const ta=document.createElement('textarea');ta.value=p;document.body.appendChild(ta);
+    ta.select();document.execCommand('copy');ta.remove();}
+  toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2200);
 };
 </script>
 </body>
