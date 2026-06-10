@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>harness map · selfdev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #fafafa;
+  --ink: #000;
+  --muted: #8a8a8a;
+  --border: 1px solid #000;
+  --border-muted: 1px solid #d0d0d0;
+  --font: 'JetBrains Mono', monospace;
+  --ls: 0.04em;
+  --radius: 2px;
+}
+
+html { font-size: 14px; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  letter-spacing: var(--ls);
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* corner marks */
+body::before, body::after,
+.corner-bl, .corner-br {
+  content: '';
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  z-index: 100;
+}
+body::before { top: 12px; left: 12px; border-top: var(--border); border-left: var(--border); }
+body::after  { top: 12px; right: 12px; border-top: var(--border); border-right: var(--border); }
+.corner-bl { bottom: 12px; left: 12px; border-bottom: var(--border); border-left: var(--border); }
+.corner-br { bottom: 12px; right: 12px; border-bottom: var(--border); border-right: var(--border); }
+
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 48px;
+}
+
+/* ─── typography helpers ─── */
+.label { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.callout { font-size: 0.72rem; color: var(--muted); }
+h2 {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+}
+.en-dash { margin: 0 2px; }
+.dot-sep { margin: 0 6px; color: var(--muted); }
+
+/* ─── section spacing ─── */
+section { margin-bottom: 56px; }
+
+/* ─────────────────────────────
+   01 · header
+───────────────────────────── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.header-left h1 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+.header-left .tagline {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.progress-box {
+  border: var(--border);
+  padding: 12px 18px;
+  min-width: 140px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.progress-box .num {
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: block;
+}
+.progress-box .progress-label {
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.progress-bar-wrap {
+  border: var(--border);
+  height: 4px;
+  margin-top: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--ink);
+  transition: width 0.3s ease;
+}
+
+/* ─────────────────────────────
+   02 · layers SVG + detail panel
+───────────────────────────── */
+.layers-container {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.layers-svg-wrap {
+  flex: 0 0 auto;
+  width: 320px;
+}
+.layer-detail-panel {
+  flex: 1;
+  min-width: 260px;
+  border: var(--border);
+  padding: 20px;
+  min-height: 220px;
+  position: relative;
+}
+.layer-detail-panel .panel-no {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  border: var(--border);
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  background: var(--bg);
+}
+.layer-detail-panel h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: 0.06em;
+}
+.layer-detail-panel p { font-size: 0.82rem; color: var(--muted); margin-bottom: 8px; }
+.layer-detail-panel .example-line {
+  font-size: 0.78rem;
+  border-left: 2px solid var(--ink);
+  padding-left: 10px;
+  margin-top: 10px;
+  color: var(--ink);
+}
+.layer-detail-panel .chips-row {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+}
+.chip {
+  border: var(--border);
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  cursor: default;
+}
+.chip.clickable { cursor: pointer; }
+.chip.clickable:hover { background: var(--ink); color: var(--bg); }
+
+/* SVG layer rect hover */
+.layer-rect {
+  cursor: pointer;
+  transition: fill 0.15s;
+}
+.layer-rect:hover { fill: #e8e8e8; }
+.layer-rect.active { fill: #d8d8d8; stroke: #000; stroke-width: 2; }
+
+/* ─────────────────────────────
+   03 · path · 5 stages
+───────────────────────────── */
+.path-wrap {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.path-flow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  min-width: 700px;
+}
+.stage-block {
+  flex: 1;
+  position: relative;
+}
+.stage-inner {
+  border: var(--border);
+  padding: 14px 16px;
+  margin-right: -1px;
+  position: relative;
+}
+.stage-inner.active-stage { background: #f0f0f0; }
+.stage-num {
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.stage-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 4px 0 2px;
+  letter-spacing: 0.04em;
+}
+.stage-artifact {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.stage-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.stage-check-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.stage-check-wrap input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border: var(--border);
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+}
+.stage-check-wrap input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 1px; left: 1px;
+  width: 8px; height: 8px;
+  background: var(--ink);
+}
+.btn-copy {
+  background: none;
+  border: var(--border-muted);
+  font-family: var(--font);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 2px 7px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.btn-copy:hover { border-color: var(--ink); color: var(--ink); }
+.btn-copy.copied { color: var(--ink); border-color: var(--ink); }
+
+/* arrow connector */
+.stage-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  flex-shrink: 0;
+  padding-top: 28px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+.stage-arrow.loop {
+  position: relative;
+}
+/* dashed loop line under last stage */
+.loop-indicator {
+  margin-top: 8px;
+  font-size: 0.65rem;
+  color: var(--muted);
+  border-top: 1px dashed #888;
+  padding-top: 4px;
+  letter-spacing: 0.06em;
+}
+
+/* ─────────────────────────────
+   04 · setup blocks grid
+───────────────────────────── */
+.blocks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  border: var(--border);
+}
+.block-card {
+  border: none;
+  border-right: var(--border);
+  border-bottom: var(--border);
+  padding: 14px;
+  position: relative;
+  background: var(--bg);
+}
+.block-card:nth-child(4n) { border-right: none; }
+.block-card:nth-last-child(-n+4) { border-bottom: none; }
+.block-num {
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+.block-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+.block-pre {
+  font-family: var(--font);
+  font-size: 0.6rem;
+  line-height: 1.5;
+  color: var(--muted);
+  white-space: pre;
+  overflow: hidden;
+  border: var(--border-muted);
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  background: #f5f5f5;
+}
+.block-check-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+.block-check-wrap input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 10px; height: 10px;
+  border: var(--border);
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+}
+.block-check-wrap input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 1px; left: 1px;
+  width: 6px; height: 6px;
+  background: var(--ink);
+}
+
+/* ─────────────────────────────
+   05 · practice table
+───────────────────────────── */
+.practice-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.practice-table th {
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: var(--border);
+  padding: 6px 10px;
+}
+.practice-table td {
+  padding: 7px 10px;
+  border-bottom: var(--border-muted);
+  vertical-align: top;
+}
+.practice-table tr:last-child td { border-bottom: none; }
+.practice-table tr:hover td { background: #f5f5f5; }
+.practice-table code {
+  font-family: var(--font);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ─────────────────────────────
+   06 · lens bars
+───────────────────────────── */
+.lens-bars { display: flex; flex-direction: column; gap: 6px; }
+.lens-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lens-name {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  min-width: 280px;
+  color: var(--ink);
+}
+.lens-track {
+  flex: 1;
+  height: 12px;
+  background: #e8e8e8;
+  border: var(--border-muted);
+  position: relative;
+}
+.lens-fill {
+  height: 100%;
+  background: var(--ink);
+}
+.lens-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ─────────────────────────────
+   07 · result columns
+───────────────────────────── */
+.result-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.result-col h3 {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: var(--border-muted);
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+}
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+.result-table th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  border-bottom: var(--border-muted);
+  padding: 4px 6px;
+}
+.result-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+.result-table tr:last-child td { border-bottom: none; }
+.status-ok { color: var(--ink); }
+.status-mid { color: var(--muted); }
+.status-fail { color: #444; text-decoration: line-through; text-decoration-color: #aaa; }
+.pattern-list { list-style: none; }
+.pattern-list li {
+  font-size: 0.75rem;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+  color: var(--muted);
+}
+.pattern-list li::before {
+  content: '– ';
+  color: var(--ink);
+}
+.pattern-list li:last-child { border-bottom: none; }
+.result-note {
+  margin-top: 12px;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+/* ─────────────────────────────
+   08 · footer
+───────────────────────────── */
+.footer {
+  border-top: var(--border);
+  padding-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.footer-sig {
+  font-size: 0.75rem;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  text-transform: none !important;
+}
+
+/* ─── responsive ─── */
+@media (max-width: 900px) {
+  .page-wrap { padding: 32px 24px; }
+  .blocks-grid { grid-template-columns: repeat(2, 1fr); }
+  .block-card:nth-child(4n) { border-right: var(--border); }
+  .block-card:nth-last-child(-n+4) { border-bottom: var(--border); }
+  .block-card:nth-child(2n) { border-right: none; }
+  .block-card:nth-last-child(-n+2) { border-bottom: none; }
+  .result-cols { grid-template-columns: 1fr; }
+  .layers-svg-wrap { width: 100%; }
+}
+@media (max-width: 620px) {
+  .blocks-grid { grid-template-columns: 1fr; }
+  .block-card { border-right: none; border-bottom: var(--border); }
+  .block-card:last-child { border-bottom: none; }
+  .lens-name { min-width: 160px; }
+  .path-flow { min-width: 540px; }
+}
+
+/* notification toast */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  padding: 8px 18px;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 200;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+<div class="corner-bl"></div>
+<div class="corner-br"></div>
+
+<div class="page-wrap">
+
+<!-- ─────────────────────────────
+     01 · header
+───────────────────────────── -->
+<header class="header">
+  <div class="header-left">
+    <h1>harness map <span class="en-dash">·</span> selfdev</h1>
+    <p class="tagline">агент = модель + харнес <span class="dot-sep">·</span> собери контур за вечер</p>
+  </div>
+  <div class="progress-box">
+    <span class="num" id="prog-num">0/12</span>
+    <span class="progress-label">блоков готово</span>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ─────────────────────────────
+     02 · layers
+───────────────────────────── -->
+<section id="sec-layers">
+  <h2>02 · слои харнеса</h2>
+  <div class="layers-container">
+    <div class="layers-svg-wrap">
+      <!-- dotted grid SVG + layer stack -->
+      <svg id="layers-svg" viewBox="0 0 320 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+        <!-- dotted grid -->
+        <defs>
+          <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="10" cy="10" r="0.5" fill="#d9d9d9"/>
+          </pattern>
+        </defs>
+        <rect width="320" height="440" fill="url(#dots)"/>
+
+        <!-- layer blocks (top=operator, bottom=model) -->
+        <!-- operator -->
+        <rect class="layer-rect" id="lr-operator" x="20" y="20" width="280" height="44" fill="#fafafa" stroke="#000" stroke-width="1" rx="2"/>
+        <text x="30" y="37" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" letter-spacing="0.1">01</text>
+        <text x="50" y="37" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#000" letter-spacing="0.04">operator</text>
+        <text x="30" y="52" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8a8a8a" letter-spacing="0.06">кто держит контур</text>
+
+        <!-- harness -->
+        <rect class="layer-rect" id="lr-harness" x="20" y="72" width="280" height="100" fill="#fafafa" stroke="#000" stroke-width="1" rx="2"/>
+        <text x="30" y="89" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" letter-spacing="0.1">02</text>
+        <text x="50" y="89" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#000" letter-spacing="0.04">harness</text>
+        <!-- harness chips inside -->
+        <rect x="30" y="96" width="58" height="16" fill="none" stroke="#000" stroke-width="0.8" rx="1"/>
+        <text x="59" y="108" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#000" text-anchor="middle" letter-spacing="0.06">context</text>
+        <rect x="96" y="96" width="52" height="16" fill="none" stroke="#000" stroke-width="0.8" rx="1"/>
+        <text x="122" y="108" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#000" text-anchor="middle" letter-spacing="0.06">tools</text>
+        <rect x="156" y="96" width="68" height="16" fill="none" stroke="#000" stroke-width="0.8" rx="1"/>
+        <text x="190" y="108" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#000" text-anchor="middle" letter-spacing="0.06">permissions</text>
+        <rect x="30" y="120" width="80" height="16" fill="none" stroke="#000" stroke-width="0.8" rx="1"/>
+        <text x="70" y="132" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#000" text-anchor="middle" letter-spacing="0.06">evals+review</text>
+        <rect x="118" y="120" width="58" height="16" fill="none" stroke="#000" stroke-width="0.8" rx="1"/>
+        <text x="147" y="132" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#000" text-anchor="middle" letter-spacing="0.06">evidence</text>
+        <rect x="30" y="144" width="62" height="16" fill="none" stroke="#000" stroke-width="0.8" rx="1"/>
+        <text x="61" y="156" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#000" text-anchor="middle" letter-spacing="0.06">lifecycle</text>
+        <rect x="100" y="144" width="50" height="16" fill="none" stroke="#000" stroke-width="0.8" rx="1"/>
+        <text x="125" y="156" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#000" text-anchor="middle" letter-spacing="0.06">owner</text>
+
+        <!-- skills -->
+        <rect class="layer-rect" id="lr-skills" x="20" y="180" width="280" height="44" fill="#fafafa" stroke="#000" stroke-width="1" rx="2"/>
+        <text x="30" y="197" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" letter-spacing="0.1">03</text>
+        <text x="50" y="197" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#000" letter-spacing="0.04">skills</text>
+        <text x="30" y="212" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8a8a8a" letter-spacing="0.06">отчуждённые куски способа действовать</text>
+
+        <!-- tools -->
+        <rect class="layer-rect" id="lr-tools" x="20" y="232" width="280" height="44" fill="#fafafa" stroke="#000" stroke-width="1" rx="2"/>
+        <text x="30" y="249" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" letter-spacing="0.1">04</text>
+        <text x="50" y="249" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#000" letter-spacing="0.04">tools</text>
+        <text x="30" y="264" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8a8a8a" letter-spacing="0.06">файлы, скрипты, mcp-серверы</text>
+
+        <!-- evals + evidence -->
+        <rect class="layer-rect" id="lr-evals" x="20" y="284" width="280" height="44" fill="#fafafa" stroke="#000" stroke-width="1" rx="2"/>
+        <text x="30" y="301" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" letter-spacing="0.1">05</text>
+        <text x="50" y="301" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#000" letter-spacing="0.04">evals + evidence</text>
+        <text x="30" y="316" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8a8a8a" letter-spacing="0.06">качество виден, след остаётся</text>
+
+        <!-- environment -->
+        <rect class="layer-rect" id="lr-env" x="20" y="336" width="280" height="44" fill="#fafafa" stroke="#000" stroke-width="1" rx="2"/>
+        <text x="30" y="353" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" letter-spacing="0.1">06</text>
+        <text x="50" y="353" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#000" letter-spacing="0.04">environment</text>
+        <text x="30" y="368" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8a8a8a" letter-spacing="0.06">терминалы, vault, cli runtime</text>
+
+        <!-- model -->
+        <rect class="layer-rect" id="lr-model" x="20" y="388" width="280" height="44" fill="#fafafa" stroke="#000" stroke-width="1" rx="2"/>
+        <text x="30" y="405" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" letter-spacing="0.1">07</text>
+        <text x="50" y="405" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#000" letter-spacing="0.04">model</text>
+        <text x="30" y="420" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8a8a8a" letter-spacing="0.06">claude / codex · заводится заново каждый раз</text>
+
+        <!-- vertical bracket lines -->
+        <line x1="10" y1="20" x2="10" y2="420" stroke="#d9d9d9" stroke-width="1"/>
+        <line x1="310" y1="20" x2="310" y2="420" stroke="#d9d9d9" stroke-width="1"/>
+        <!-- bracket arrows -->
+        <text x="4" y="90" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" transform="rotate(-90 4 90)">носишь</text>
+        <text x="4" y="390" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8a8a8a" transform="rotate(-90 4 390)">заводишь</text>
+      </svg>
+    </div>
+
+    <!-- detail panel -->
+    <div class="layer-detail-panel">
+      <span class="panel-no">fig.2</span>
+      <p class="callout" style="margin-bottom:14px;">кликни слой — увидишь вопрос слоя и пример контура м.</p>
+      <div id="layer-detail-content">
+        <h3>operator</h3>
+        <p>вопрос слоя: кто держит контур и проектирует условия — не «как попросить», а «какой контур должен существовать без меня».</p>
+        <div class="example-line">м.: рефлексия по вечерам — мой ритуал. агент помогает, но инициирую я. написал стоп-правило: без моего запроса ничего не отправлять.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────
+     03 · path · 5 stages
+───────────────────────────── -->
+<section id="sec-path">
+  <h2>03 · путь · 5 стадий</h2>
+  <div class="path-wrap">
+    <div class="path-flow">
+
+      <!-- stage 1: discovery -->
+      <div class="stage-block">
+        <div class="stage-inner" id="st1">
+          <div class="stage-num">01</div>
+          <div class="stage-title">discovery</div>
+          <div class="stage-artifact">harness-discovery.md</div>
+          <div class="stage-actions">
+            <div class="stage-check-wrap">
+              <input type="checkbox" id="sc1" onchange="stageCheck(1)">
+              <label for="sc1">сделано</label>
+            </div>
+            <button class="btn-copy" onclick="copyPrompt(1, this)">копировать промпт</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-arrow">&#8594;</div>
+
+      <!-- stage 2: inventory -->
+      <div class="stage-block">
+        <div class="stage-inner" id="st2">
+          <div class="stage-num">02</div>
+          <div class="stage-title">инвентарь</div>
+          <div class="stage-artifact">harness-inventory.md</div>
+          <div class="stage-actions">
+            <div class="stage-check-wrap">
+              <input type="checkbox" id="sc2" onchange="stageCheck(2)">
+              <label for="sc2">сделано</label>
+            </div>
+            <button class="btn-copy" onclick="copyPrompt(2, this)">копировать промпт</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-arrow">&#8594;</div>
+
+      <!-- stage 3: CLAUDE.md -->
+      <div class="stage-block">
+        <div class="stage-inner" id="st3">
+          <div class="stage-num">03</div>
+          <div class="stage-title">точка входа</div>
+          <div class="stage-artifact">~/.claude/CLAUDE.md</div>
+          <div class="stage-actions">
+            <div class="stage-check-wrap">
+              <input type="checkbox" id="sc3" onchange="stageCheck(3)">
+              <label for="sc3">сделано</label>
+            </div>
+            <button class="btn-copy" onclick="copyPrompt(3, this)">копировать промпт</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-arrow">&#8594;</div>
+
+      <!-- stage 4: 3 skills -->
+      <div class="stage-block">
+        <div class="stage-inner" id="st4">
+          <div class="stage-num">04</div>
+          <div class="stage-title">3 скилла</div>
+          <div class="stage-artifact">skills/имя/SKILL.md</div>
+          <div class="stage-actions">
+            <div class="stage-check-wrap">
+              <input type="checkbox" id="sc4" onchange="stageCheck(4)">
+              <label for="sc4">сделано</label>
+            </div>
+            <button class="btn-copy" onclick="copyPrompt(4, this)">копировать промпт</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-arrow">&#8594;</div>
+
+      <!-- stage 5: refresh ritual -->
+      <div class="stage-block">
+        <div class="stage-inner" id="st5">
+          <div class="stage-num">05</div>
+          <div class="stage-title">refresh-ритуал</div>
+          <div class="stage-artifact">чеклист + событие в календаре</div>
+          <div class="stage-actions">
+            <div class="stage-check-wrap">
+              <input type="checkbox" id="sc5" onchange="stageCheck(5)">
+              <label for="sc5">сделано</label>
+            </div>
+            <button class="btn-copy" onclick="copyPrompt(5, this)">копировать промпт</button>
+          </div>
+          <div class="loop-indicator">&#x21A9; петля обновления раз в 1–2 нед</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────
+     04 · setup blocks
+───────────────────────────── -->
+<section id="sec-blocks">
+  <h2>04 · блоки сетапа · 12 терминальных зарисовок</h2>
+  <div class="blocks-grid" id="blocks-grid">
+
+    <!-- 01 CLAUDE.md -->
+    <div class="block-card">
+      <div class="block-num">01</div>
+      <div class="block-title">claude.md</div>
+      <pre class="block-pre"># мой контур
+## кто я
+[2–3 строки, не биография]
+## мои файлы
+- план: aboutme.md
+## как мне помогать
+[стиль, язык, длина]
+## границы
+- не отправлять наружу</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc1" onchange="blockCheck()">
+        <label for="bc1">готово</label>
+      </div>
+    </div>
+
+    <!-- 02 memory -->
+    <div class="block-card">
+      <div class="block-num">02</div>
+      <div class="block-title">memory.md · индекс</div>
+      <pre class="block-pre">## memory
+- [паттерн A](cards/a.md)
+  одна строка · суть
+- [решение B](cards/b.md)
+  одна строка · суть
+- [инсайт C](cards/c.md)
+  одна строка · суть</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc2" onchange="blockCheck()">
+        <label for="bc2">готово</label>
+      </div>
+    </div>
+
+    <!-- 03 gates -->
+    <div class="block-card">
+      <div class="block-num">03</div>
+      <div class="block-title">карта границ</div>
+      <pre class="block-pre">| уровень  | что попадает    |
+|----------|-----------------|
+| public   | цели, практики  |
+| team     | проекты, итоги  |
+| dyad     | разговоры, prep |
+| vulnerable| parts-map      |</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc3" onchange="blockCheck()">
+        <label for="bc3">готово</label>
+      </div>
+    </div>
+
+    <!-- 04 about-me -->
+    <div class="block-card">
+      <div class="block-num">04</div>
+      <div class="block-title">about-me.md</div>
+      <pre class="block-pre">## кто я сейчас
+[роль, стадия]
+## план развития (ппр)
+- [цель 1] · к [дата]
+- [цель 2] · к [дата]
+## стиль работы
+[ритм, предпочтения]</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc4" onchange="blockCheck()">
+        <label for="bc4">готово</label>
+      </div>
+    </div>
+
+    <!-- 05 session inspector -->
+    <div class="block-card">
+      <div class="block-num">05</div>
+      <div class="block-title">session inspector lite</div>
+      <pre class="block-pre">тема: сетап контура    3 sess
+→ что: claude.md, скиллы
+→ открыто: евалы в вс
+→ prompt-handoff: «открой
+  CLAUDE.md, продолжи st5»
+паттерны: утро 25–40 мин</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc5" onchange="blockCheck()">
+        <label for="bc5">готово</label>
+      </div>
+    </div>
+
+    <!-- 06 multiterminal -->
+    <div class="block-card">
+      <div class="block-num">06</div>
+      <div class="block-title">мультитерминал</div>
+      <pre class="block-pre">окно A · reflect
+окно B · decision-log
+окно C · ресёрч (фон)
+─────────────────────
+правило: 1 окно = 1 задача
+handoff при ~50% ctx</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc6" onchange="blockCheck()">
+        <label for="bc6">готово</label>
+      </div>
+    </div>
+
+    <!-- 07 insight_index -->
+    <div class="block-card">
+      <div class="block-num">07</div>
+      <div class="block-title">insight_index.md</div>
+      <pre class="block-pre">## строки
+2026-06-15 · решения
+двигаются, если есть дата;
+бездатное стоит · след:
+decision-rails 3 закрытых
+
+# формат: дата·паттерн·след</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc7" onchange="blockCheck()">
+        <label for="bc7">готово</label>
+      </div>
+    </div>
+
+    <!-- 08 decision-rails -->
+    <div class="block-card">
+      <div class="block-num">08</div>
+      <div class="block-title">decision-rails.md</div>
+      <pre class="block-pre">| решение    | варианты | woop |
+|------------|----------|------|
+| переезд    | A/B/C    | ✓    |
+| кофаундер  | письмо   | ✓    |
+| медитация  | ритуал   | ◐    |
+review-date: 2026-07-01</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc8" onchange="blockCheck()">
+        <label for="bc8">готово</label>
+      </div>
+    </div>
+
+    <!-- 09 skill anatomy -->
+    <div class="block-card">
+      <div class="block-num">09</div>
+      <div class="block-title">анатомия скилла</div>
+      <pre class="block-pre">skills/weekly-reflect/
+  SKILL.md:
+  ---
+  name: weekly-reflect
+  description: "Use when..."
+  ---
+  ## обзор
+  ## когда / не когда
+  ## шаги · формат output</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc9" onchange="blockCheck()">
+        <label for="bc9">готово</label>
+      </div>
+    </div>
+
+    <!-- 10 eval footer -->
+    <div class="block-card">
+      <div class="block-num">10</div>
+      <div class="block-title">eval-footer</div>
+      <pre class="block-pre">каждый содержательный ответ:
+
+▫ eval: T:✓ R:✓ C:○
+
+T=текст  R=правила  C=код
+✓=ok  ✗=fail  ○=н/д
+3× провал → правило в
+CLAUDE.md</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc10" onchange="blockCheck()">
+        <label for="bc10">готово</label>
+      </div>
+    </div>
+
+    <!-- 11 naming convention -->
+    <div class="block-card">
+      <div class="block-num">11</div>
+      <div class="block-title">naming convention</div>
+      <pre class="block-pre">{проект} {тип} описание
+– ГГГГ-ММ-ДД.md
+
+примеры:
+selfdev harness discovery
+– 2026-06-15.md
+m conversation prep к
+– 2026-06-13.md</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc11" onchange="blockCheck()">
+        <label for="bc11">готово</label>
+      </div>
+    </div>
+
+    <!-- 12 refresh checklist -->
+    <div class="block-card">
+      <div class="block-num">12</div>
+      <div class="block-title">refresh-чеклист</div>
+      <pre class="block-pre">раз в 1–2 нед, 15 мин:
+□ скиллы без use > месяц
+□ ≥3 ручных повтора → скилл
+□ ≥3 одинаковых ошибок → rule
+□ дубли >60% → слить
+□ границы всё ещё верные</pre>
+      <div class="block-check-wrap">
+        <input type="checkbox" id="bc12" onchange="blockCheck()">
+        <label for="bc12">готово</label>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─────────────────────────────
+     05 · practice table
+───────────────────────────── -->
+<section id="sec-practice">
+  <h2>05 · практика <span class="en-dash">·</span> скилл <span class="en-dash">·</span> данные</h2>
+  <table class="practice-table">
+    <thead>
+      <tr>
+        <th>практика</th>
+        <th>скилл-идея</th>
+        <th>данные на входе</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>терапия / ifs</td><td><code>post-session-debrief</code></td><td>заметка после сессии (не транскрипт)</td></tr>
+      <tr><td>терапия / ifs</td><td><code>parts-checkin</code></td><td>parts-map.md + описание ситуации</td></tr>
+      <tr><td>дневник / страницы</td><td><code>journal-distill</code></td><td>вставленный фрагмент страниц</td></tr>
+      <tr><td>план развития</td><td><code>track-my-selfdev</code></td><td>about-me.md + следы недели</td></tr>
+      <tr><td>решения</td><td><code>decision-log</code></td><td>decision-rails.md</td></tr>
+      <tr><td>решения</td><td><code>review-overdue</code></td><td>decision-rails.md, поле review</td></tr>
+      <tr><td>разговоры</td><td><code>conversation-prep</code></td><td>заметки о договорённостях</td></tr>
+      <tr><td>разговоры</td><td><code>debrief</code></td><td>prep-файл + память разговора</td></tr>
+      <tr><td>медитация / тело</td><td><code>practice-streak</code></td><td>строка-отметка в день</td></tr>
+      <tr><td>рефлексия</td><td><code>weekly-reflect</code></td><td>insight_index + session inspector</td></tr>
+      <tr><td>чтение</td><td><code>reading-trace</code></td><td>заметки по книге + about-me.md</td></tr>
+      <tr><td>вся практика</td><td><code>sessions-review</code></td><td>jsonl из ~/.claude/projects</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ─────────────────────────────
+     06 · lens bars
+───────────────────────────── -->
+<section id="sec-lenses">
+  <h2>06 · линзы когорты s4</h2>
+  <div class="lens-bars">
+    <div class="lens-row">
+      <div class="lens-name">Internal Family Systems (IFS)</div>
+      <div class="lens-track"><div class="lens-fill" style="width:100%"></div></div>
+      <div class="lens-count">5</div>
+    </div>
+    <div class="lens-row">
+      <div class="lens-name">CliftonStrengths (StrengthsFinder)</div>
+      <div class="lens-track"><div class="lens-fill" style="width:60%"></div></div>
+      <div class="lens-count">3</div>
+    </div>
+    <div class="lens-row">
+      <div class="lens-name">Morning Pages / Journaling</div>
+      <div class="lens-track"><div class="lens-fill" style="width:60%"></div></div>
+      <div class="lens-count">3</div>
+    </div>
+    <div class="lens-row">
+      <div class="lens-name">Vipassana / инсайт-медитация</div>
+      <div class="lens-track"><div class="lens-fill" style="width:60%"></div></div>
+      <div class="lens-count">3</div>
+    </div>
+    <div class="lens-row">
+      <div class="lens-name">Hogan Assessments (HPI / HDS / MVPI)</div>
+      <div class="lens-track"><div class="lens-fill" style="width:40%"></div></div>
+      <div class="lens-count">2</div>
+    </div>
+    <div class="lens-row">
+      <div class="lens-name">смысложизненные ориентации (СЖО)</div>
+      <div class="lens-track"><div class="lens-fill" style="width:40%"></div></div>
+      <div class="lens-count">2</div>
+    </div>
+    <div class="lens-row">
+      <div class="lens-name">Gestalt therapy</div>
+      <div class="lens-track"><div class="lens-fill" style="width:20%"></div></div>
+      <div class="lens-count">1</div>
+    </div>
+    <div class="lens-row">
+      <div class="lens-name">EMDR</div>
+      <div class="lens-track"><div class="lens-fill" style="width:20%"></div></div>
+      <div class="lens-count">1</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────
+     07 · result
+───────────────────────────── -->
+<section id="sec-result">
+  <h2>07 · возможный результат · неделя 1 · участник м.</h2>
+  <div class="result-cols">
+    <div class="result-col">
+      <h3>track_my_selfdev · review 2026-06-15</h3>
+      <table class="result-table">
+        <thead>
+          <tr>
+            <th>цель</th>
+            <th>статус</th>
+            <th>факт</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>разгрузить решения</td>
+            <td class="status-mid">◐</td>
+            <td>было 9 → стало 6; одно ревью перенесено</td>
+          </tr>
+          <tr>
+            <td>разговор с кофаундером</td>
+            <td class="status-mid">◐</td>
+            <td>письмо отправлено; разговор на вт</td>
+          </tr>
+          <tr>
+            <td>медитация 5/7</td>
+            <td class="status-fail">✗</td>
+            <td>2/7 · прицепить к страницам</td>
+          </tr>
+          <tr>
+            <td>дневник → контур</td>
+            <td class="status-ok">✓</td>
+            <td>5/7 страниц · 1 строка в insight_index</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="result-note">данные синтетические · участник м. выдуман</p>
+    </div>
+    <div class="result-col">
+      <h3>session inspector · паттерны недели</h3>
+      <table class="result-table">
+        <thead>
+          <tr>
+            <th>тема</th>
+            <th>сессий</th>
+            <th>открыто</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>сетап контура</td>
+            <td>3</td>
+            <td>евалы смотреть в вс</td>
+          </tr>
+          <tr>
+            <td>разговор с кофаундером</td>
+            <td>2</td>
+            <td>debrief после вт</td>
+          </tr>
+          <tr>
+            <td>разбор решений</td>
+            <td>2</td>
+            <td>ревью переезда 07-01</td>
+          </tr>
+          <tr>
+            <td>голосовые заметки</td>
+            <td>1</td>
+            <td>маршрут голосовое → текст</td>
+          </tr>
+        </tbody>
+      </table>
+      <ul class="pattern-list" style="margin-top:12px;">
+        <li>утром 25–40 мин; вечером сессий нет (и не надо)</li>
+        <li>бросаю то, что без даты ревью</li>
+        <li>insight_index +1: «решения двигаются, когда есть дата»</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────
+     08 · footer
+───────────────────────────── -->
+<footer class="footer">
+  <span>ai mindset <span class="dot-sep">·</span> s4 deep self development sprint <span class="dot-sep">·</span> github.com/aPoWall/harness-setup-selfdev <span class="dot-sep">·</span> сделано контуром, который здесь описан</span>
+  <span class="footer-sig">&#9678; the_doG &#9678;</span>
+</footer>
+
+</div><!-- /page-wrap -->
+
+<div class="toast" id="toast">скопировано</div>
+
+<script>
+// ─── layer data ───
+var LAYER_DATA = {
+  'lr-operator': {
+    num: '01',
+    title: 'operator',
+    q: 'кто держит контур и проектирует условия — не «как попросить», а «какой контур должен существовать без меня».',
+    ex: 'м.: рефлексия по вечерам — мой ритуал. агент помогает, но инициирую я. написал стоп-правило: без моего запроса ничего не отправлять.'
+  },
+  'lr-harness': {
+    num: '02',
+    title: 'harness · 7 чипов',
+    q: 'что входит в обвязку: context / tools / permissions / evals+review / evidence / lifecycle / owner. отдельно слои ничего не решают — контур начинается, когда замкнуты.',
+    ex: 'м.: начал с context (CLAUDE.md ~50 строк) и permissions (карта границ). остальные добавлял по мере появления задач.'
+  },
+  'lr-skills': {
+    num: '03',
+    title: 'skills',
+    q: 'отчуждённый кусок способа действовать, который можно вызвать, проверить и улучшить. рождается из 3+ ручных повторов.',
+    ex: 'м.: первый скилл — track-my-selfdev (уже был с D4). второй — weekly-reflect. третий — conversation-prep. всё, три достаточно.'
+  },
+  'lr-tools': {
+    num: '04',
+    title: 'tools',
+    q: 'что агент умеет трогать — файлы, скрипты, MCP-серверы. расширяет по мере необходимости, не заранее.',
+    ex: 'м.: файлы vault (read/write), obsidian search (MCP). больше ничего не понадобилось на первой неделе.'
+  },
+  'lr-evals': {
+    num: '05',
+    title: 'evals + evidence',
+    q: 'как понять, что ответ хороший — и какой след остаётся. без следа контур превращается в декларацию.',
+    ex: 'м.: eval-footer включён в CLAUDE.md. за неделю 2 ✗ по тексту — добавил правило «вопросы вместо интерпретаций».'
+  },
+  'lr-env': {
+    num: '06',
+    title: 'environment',
+    q: 'где запускается контур — терминалы, vault, CLI runtime. мультитерминальный протокол: 1 окно = 1 задача.',
+    ex: 'м.: 2 терминала утром. окно A — основная работа, окно B — ресёрч фоном. handoff при ~50% контекста.'
+  },
+  'lr-model': {
+    num: '07',
+    title: 'model',
+    q: 'claude / codex — заводится заново каждый раз. харнес переживает смену моделей, именно поэтому строить его стоит.',
+    ex: 'м.: claude code с CLAUDE.md. контур работает независимо от версии модели — файлы никуда не делись.'
+  }
+};
+
+// ─── layer click ───
+var layers = ['lr-operator','lr-harness','lr-skills','lr-tools','lr-evals','lr-env','lr-model'];
+layers.forEach(function(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('click', function() {
+    layers.forEach(function(lid) {
+      var r = document.getElementById(lid);
+      if (r) r.classList.remove('active');
+    });
+    el.classList.add('active');
+    var d = LAYER_DATA[id];
+    var panel = document.getElementById('layer-detail-content');
+    panel.innerHTML =
+      '<h3>' + d.num + ' · ' + d.title + '</h3>' +
+      '<p>' + d.q + '</p>' +
+      '<div class="example-line">м.: ' + d.ex + '</div>';
+  });
+});
+
+// ─── stage prompts ───
+var PROMPTS = {
+  1: 'Я прохожу discovery своего harness. Задай мне 7 вопросов по одному:\nпрактика саморазвития, регулярные AI-задачи, частота, где живут промпты,\nчто делегировал бы, границы приватности, какие runtime стоят.\nИз ответов собери: портрет практики + список задач-кандидатов в скиллы\n+ карту границ public/team/dyad/vulnerable. Сохрани в harness-discovery.md.',
+  2: 'Вот что у меня уже есть: [перечисли, включая артефакты D1–D8].\nПострой таблицу gap-анализа: слой (context / tools / permissions / evals /\nevidence / lifecycle / owner) · что есть · чего не хватает · первый шаг.\nСохрани в harness-inventory.md. Не предлагай строить то, что уже есть.',
+  3: 'Помоги мне создать ~/.claude/CLAUDE.md для self-dev практики.\nСтруктура: кто я (2–3 строки), мои файлы (about-me, parts-map, memory-rules, decision-rails),\nкак мне помогать (стиль, язык), границы (никогда без подтверждения — список).\nПравило тощего файла: ≤60 строк, детали — ссылками.',
+  4: 'Из harness-discovery.md возьми топ-3 задачи. Для каждой создай\n~/.claude/skills/<имя>/SKILL.md: frontmatter name + description\n(только триггеры «Use when…»), тело — процедура, источники, формат\noutput, чего не делать. Покажи каждый до сохранения. После — прогони\nпервый скилл на реальной задаче прямо сейчас.',
+  5: 'Harness refresh. Пройди по ~/.claude/skills/ и CLAUDE.md:\nчто не использовалось, что дублируется, какие границы устарели.\nСверь с track_my_selfdev.md — изменилась ли практика. Предложи\n≤3 изменения, по одному за раз, жди моего да/нет.'
+};
+
+function copyPrompt(n, btn) {
+  var text = PROMPTS[n];
+  var copy = function(t) {
+    try {
+      navigator.clipboard.writeText(t).then(function() {
+        showToast();
+        btn.textContent = 'скопировано';
+        btn.classList.add('copied');
+        setTimeout(function(){ btn.textContent = 'копировать промпт'; btn.classList.remove('copied'); }, 2000);
+      }).catch(function() { fallbackCopy(t, btn); });
+    } catch(e) { fallbackCopy(t, btn); }
+  };
+  copy(text);
+}
+
+function fallbackCopy(text, btn) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast();
+    if (btn) { btn.textContent = 'скопировано'; btn.classList.add('copied'); setTimeout(function(){ btn.textContent = 'копировать промпт'; btn.classList.remove('copied'); }, 2000); }
+  } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+function showToast() {
+  var t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1500);
+}
+
+// ─── stage checkboxes ───
+var LS_KEY_STAGE = 'hmap_v1_stage_';
+function stageCheck(n) {
+  var cb = document.getElementById('sc'+n);
+  try { localStorage.setItem(LS_KEY_STAGE + n, cb.checked ? '1' : '0'); } catch(e){}
+}
+
+// ─── block checkboxes + header counter ───
+var LS_KEY_BLOCK = 'hmap_v1_block_';
+function blockCheck() {
+  var total = 0;
+  for (var i = 1; i <= 12; i++) {
+    var cb = document.getElementById('bc'+i);
+    if (cb && cb.checked) total++;
+  }
+  document.getElementById('prog-num').textContent = total + '/12';
+  document.getElementById('prog-bar').style.width = Math.round(total/12*100) + '%';
+  try { /* save each */ for (var j=1;j<=12;j++) { var c=document.getElementById('bc'+j); if(c) localStorage.setItem(LS_KEY_BLOCK+j,c.checked?'1':'0'); } } catch(e){}
+}
+
+// ─── restore state on load ───
+(function() {
+  try {
+    for (var i = 1; i <= 5; i++) {
+      var v = localStorage.getItem(LS_KEY_STAGE + i);
+      if (v === '1') { var el = document.getElementById('sc'+i); if (el) el.checked = true; }
+    }
+    var total = 0;
+    for (var j = 1; j <= 12; j++) {
+      var v2 = localStorage.getItem(LS_KEY_BLOCK + j);
+      if (v2 === '1') {
+        var el2 = document.getElementById('bc'+j);
+        if (el2) { el2.checked = true; total++; }
+      }
+    }
+    document.getElementById('prog-num').textContent = total + '/12';
+    document.getElementById('prog-bar').style.width = Math.round(total/12*100) + '%';
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
