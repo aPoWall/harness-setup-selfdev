@@ -28,8 +28,10 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   radial-gradient(680px 520px at 92% 8%, rgba(94,155,240,.10), transparent 62%),
   linear-gradient(180deg, var(--bg1), var(--bg0) 45%, var(--bg2))}
 @keyframes cardIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
-@keyframes promptFlash{0%{background:var(--glass-strong)}40%{background:rgba(169,139,240,.18)}100%{background:var(--glass-strong)}}
-@media(prefers-reduced-motion:reduce){.block,.panel,.hero{animation:none!important}}
+@keyframes rowFlash{0%{background:transparent}35%{background:rgba(169,139,240,.22)}100%{background:transparent}}
+@keyframes rowFlashLens{0%{background:transparent}35%{background:rgba(94,155,240,.22)}100%{background:transparent}}
+@keyframes chipIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.block,.panel,.hero,*{animation:none!important;transition:none!important}}
 
 .wrap{max-width:1200px;margin:0 auto;padding:0 20px 70px}
 header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
@@ -61,18 +63,27 @@ header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-
 .seg button{font:inherit;font-size:11px;color:var(--dim);background:none;border:0;padding:6px 12px;cursor:pointer;transition:.15s}
 .seg button.on{background:var(--accent2-soft);color:var(--ink)}
 .lens{font:inherit;font-size:11px;color:var(--dim);background:var(--glass-hi);border:1px solid var(--line);
-  border-radius:999px;padding:6px 11px;cursor:pointer;transition:.15s}
+  border-radius:999px;padding:6px 11px;cursor:pointer;transition:.15s;position:relative}
 .lens:hover{border-color:var(--line-hi);color:var(--ink)}
 .lens.on{background:var(--accent-soft);border-color:rgba(94,155,240,.5);color:var(--ink)}
 .lens.on::before{content:"+ ";color:var(--accent)}
-.lens-note{width:100%;color:var(--faint);font-size:10.5px;margin-top:2px}
+/* бейдж "+1 пункт" на включённой линзе */
+.lens.on .lens-badge{display:inline-flex}
+.lens-badge{display:none;align-items:center;margin-left:6px;padding:1px 5px;
+  border-radius:4px;background:rgba(94,155,240,.22);border:1px solid rgba(94,155,240,.38);
+  color:var(--accent);font-size:9px;font-weight:600;white-space:nowrap}
+.lens-note{width:100%;color:var(--faint);font-size:10.5px;margin-top:2px;line-height:1.5}
 
 /* блоки */
 .blocks{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .block{position:relative;border:1px solid var(--line);border-radius:var(--r);padding:13px 13px 11px;
   background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  cursor:pointer;transition:transform .18s, box-shadow .18s, border-color .18s;animation:cardIn .35s both}
+  cursor:pointer;transition:transform .18s, box-shadow .18s, border-color .18s, opacity .2s, background .18s;
+  animation:cardIn .35s both}
 .block:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--line-hi)}
+/* приглушить невыбранные когда есть хоть один выбор */
+.blocks.has-sel .block:not(.on){opacity:.82}
+.blocks.has-sel .block:not(.on):hover{opacity:1}
 
 /* иконка-капсула */
 .block .bh{display:flex;gap:11px;align-items:flex-start;margin-bottom:7px}
@@ -92,14 +103,19 @@ header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-
 .block .art-chip b{color:var(--dim);font-weight:500}
 .block .gh-link{font-size:10px;color:var(--accent2);text-decoration:none;margin-left:auto;white-space:nowrap;opacity:.75;transition:.15s}
 .block .gh-link:hover{opacity:1;text-decoration:underline}
-.block .sym{position:absolute;top:11px;right:12px;color:var(--faint);font-size:12px;transition:.2s}
+/* чек-капсула вместо sym-символа: появляется только на on */
+.block .sym{position:absolute;top:9px;right:10px;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:999px;
+  font-size:14px;transition:.2s;color:var(--faint);background:none}
+.block.on .sym{color:var(--accent2);background:rgba(169,139,240,.18);border:1px solid rgba(169,139,240,.45)}
 .block.on{border-color:rgba(169,139,240,.55);
-  background:linear-gradient(180deg, rgba(169,139,240,.09), var(--glass));
+  background:linear-gradient(180deg, rgba(169,139,240,.13), var(--glass));
   box-shadow:inset 0 0 0 1px rgba(169,139,240,.18), 0 0 0 1px rgba(169,139,240,.12)}
 .block.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
   border-radius:var(--r) 0 0 var(--r);background:var(--accent2);opacity:.8}
-.block.on .sym{color:var(--accent2)}
 .block.core::after{content:"ядро";position:absolute;bottom:9px;right:12px;color:var(--faint);font-size:8.5px;letter-spacing:.1em}
+.block.on.core::after{right:36px}/* сдвинуть «ядро» чтобы не перекрывалось sym-капсулой */
 
 /* терминал-превью примера */
 .block .ex-wrap{margin-top:8px;border:1px solid var(--line-soft);border-radius:8px;overflow:hidden;cursor:default}
@@ -115,17 +131,60 @@ header.top{position:sticky;top:0;z-index:30;backdrop-filter:var(--blur);-webkit-
   background:linear-gradient(transparent, rgba(10,8,18,.9));pointer-events:none;transition:opacity .3s}
 .block pre.ex.open + .ex-fade{opacity:0}
 
-/* панель промпта */
+/* ─── панель СБОРКА ─── */
+.build-bar{padding:10px 14px;border-bottom:1px solid var(--line-soft);
+  display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:44px}
+.build-bar .build-lbl{color:var(--faint);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  margin-right:4px;white-space:nowrap}
+.build-empty{color:var(--faint);font-size:10.5px;font-style:italic}
+/* чипы сборки */
+.sel-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;
+  border-radius:999px;font-size:10.5px;cursor:pointer;transition:.15s;animation:chipIn .18s both;
+  border:1px solid rgba(169,139,240,.38);background:rgba(169,139,240,.1);color:var(--ink)}
+.sel-chip.lens-chip{border-color:rgba(94,155,240,.38);background:rgba(94,155,240,.1)}
+.sel-chip .chip-sym{font-size:11px;color:var(--accent2);line-height:1}
+.sel-chip.lens-chip .chip-sym{color:var(--accent)}
+.sel-chip .chip-x{font-size:9px;color:var(--faint);margin-left:2px;opacity:.7;transition:.1s}
+.sel-chip:hover .chip-x{opacity:1;color:var(--ink)}
+.sel-chip .chip-prefix{color:var(--accent);font-size:9px;margin-right:2px}
+
+/* ─── панель промпта — структурированный вид ─── */
 .panel{position:sticky;top:62px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
   background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
   box-shadow:var(--shadow-lg);animation:cardIn .4s .1s both}
-.panel .ph{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--line-soft);
-  transition:background .4s}
-.panel .ph.flash{animation:promptFlash .5s ease}
+.panel .ph{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--line-soft)}
 .panel .ph b{font-weight:600;font-size:12.5px}
 .panel .ph .cnt{margin-left:auto;color:var(--faint);font-size:10.5px;font-feature-settings:"tnum"}
-.panel pre{margin:0;padding:14px;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word;
-  color:var(--dim);font-size:10.6px;line-height:1.6;font-family:var(--mono)}
+/* легенда */
+.prompt-legend{display:flex;gap:12px;padding:6px 14px;border-bottom:1px solid var(--line-soft);
+  background:rgba(0,0,0,.18)}
+.pleg{display:flex;align-items:center;gap:5px;font-size:9.5px;color:var(--faint)}
+.pleg .pleg-bar{width:3px;height:11px;border-radius:2px;flex:0 0 3px}
+.pleg .pleg-bar.block-bar{background:var(--accent2)}
+.pleg .pleg-bar.lens-bar{background:var(--accent)}
+
+/* промпт-вью: div вместо pre */
+#prompt-view{margin:0;padding:10px 14px 6px;max-height:420px;overflow:auto;font-size:10.6px;
+  line-height:1.6;font-family:var(--mono)}
+.pt-frame{color:var(--faint);font-size:9.8px;padding:1px 0;white-space:pre-wrap;word-break:break-word}
+.pt-rows{padding:4px 0}
+.pt-row{display:flex;align-items:flex-start;gap:8px;padding:5px 8px;border-radius:6px;
+  border-left:3px solid transparent;margin-bottom:3px;transition:background .3s}
+.pt-row.block-row{border-left-color:var(--accent2)}
+.pt-row.lens-row{border-left-color:var(--accent)}
+.pt-row.flash{animation:rowFlash .55s ease}
+.pt-row.flash-lens{animation:rowFlashLens .55s ease}
+.pt-num{flex:0 0 22px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.06);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--dim);font-feature-settings:"tnum";flex-shrink:0}
+.pt-num.block-num{border-color:rgba(169,139,240,.35);color:var(--accent2)}
+.pt-num.lens-num{border-color:rgba(94,155,240,.35);color:var(--accent)}
+.pt-text{color:var(--dim);font-size:10.4px;line-height:1.55;flex:1;white-space:pre-wrap;word-break:break-word}
+.pt-badge{display:inline-flex;align-items:center;padding:1px 5px;margin-left:6px;
+  border-radius:4px;font-size:9px;font-weight:600;white-space:nowrap;vertical-align:middle;flex-shrink:0}
+.pt-badge.block-badge{background:rgba(169,139,240,.16);border:1px solid rgba(169,139,240,.3);color:var(--accent2)}
+.pt-badge.lens-badge{background:rgba(94,155,240,.16);border:1px solid rgba(94,155,240,.3);color:var(--accent)}
+
 .pf{display:flex;gap:9px;align-items:center;padding:11px 14px;border-top:1px solid var(--line-soft)}
 .copy{font:inherit;font-weight:600;font-size:12px;color:#0d0b14;border:0;cursor:pointer;
   background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:9px;padding:10px 16px;
@@ -165,7 +224,12 @@ footer .dog{margin-left:auto;color:var(--dim)}
   padding:9px 16px;font-size:11.5px;transition:.25s;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
-@media(max-width:920px){.layout{grid-template-columns:1fr}.panel{position:static}.man-grid{grid-template-columns:1fr}}
+@media(max-width:920px){
+  .layout{grid-template-columns:1fr}
+  .panel{position:static}
+  .man-grid{grid-template-columns:1fr}
+  .build-bar{order:-1}
+}
 @media(max-width:600px){.blocks{grid-template-columns:1fr}.hero h1{font-size:18px}}
 </style>
 </head>
@@ -200,14 +264,14 @@ footer .dog{margin-left:auto;color:var(--dim)}
           <button data-lv="cc" class="on">claude code / codex</button>
           <button data-lv="chat">любой чат-бот</button>
         </div>
-        <div class="lbl">линзы практики · каждая добавляет в промпт свой блок</div>
-        <span class="lens" data-lens="ifs">ifs · части</span>
-        <span class="lens" data-lens="rails">журнал решений</span>
-        <span class="lens" data-lens="pages">утренние страницы</span>
-        <span class="lens" data-lens="vipassana">медитация · тело</span>
-        <span class="lens" data-lens="okr">okr</span>
-        <span class="lens" data-lens="gestalt">гештальт</span>
-        <span class="lens-note" id="lens-note">линзы не выбраны — агент подберёт 2–3 на discovery из библиотеки 116</span>
+        <div class="lbl">линзы практики · каждая добавляет в промпт свой пункт</div>
+        <span class="lens" data-lens="ifs">ifs · части<span class="lens-badge">+1 пункт</span></span>
+        <span class="lens" data-lens="rails">журнал решений<span class="lens-badge">+1 пункт</span></span>
+        <span class="lens" data-lens="pages">утренние страницы<span class="lens-badge">+1 пункт</span></span>
+        <span class="lens" data-lens="vipassana">медитация · тело<span class="lens-badge">+1 пункт</span></span>
+        <span class="lens" data-lens="okr">okr<span class="lens-badge">+1 пункт</span></span>
+        <span class="lens" data-lens="gestalt">гештальт<span class="lens-badge">+1 пункт</span></span>
+        <div class="lens-note" id="lens-note">каждая включённая линза добавляет отдельный пункт в промпт и уточняет вопросы discovery под твою практику — линзы не выбраны, агент подберёт 2–3 сам</div>
         <div class="lbl">блоки контура · ядро выбрано · пример развёрнут</div>
       </div>
       <div class="blocks" id="blocks"></div>
@@ -251,8 +315,27 @@ footer .dog{margin-left:auto;color:var(--dim)}
     </div>
 
     <aside class="panel">
-      <div class="ph" id="panel-ph"><b>твой промпт</b><span class="cnt" id="cnt"></span></div>
-      <pre id="prompt"></pre>
+      <!-- строка сборки -->
+      <div class="build-bar" id="build-bar">
+        <span class="build-lbl">сборка</span>
+        <span class="build-empty" id="build-empty">выбери блоки слева</span>
+      </div>
+
+      <!-- шапка промпта -->
+      <div class="ph" id="panel-ph">
+        <b>твой промпт</b>
+        <span class="cnt" id="cnt"></span>
+      </div>
+
+      <!-- легенда -->
+      <div class="prompt-legend">
+        <div class="pleg"><div class="pleg-bar block-bar"></div>блок</div>
+        <div class="pleg"><div class="pleg-bar lens-bar"></div>линза</div>
+      </div>
+
+      <!-- структурированный вид промпта -->
+      <div id="prompt-view"></div>
+
       <div class="pf">
         <button class="copy" id="copy">скопировать промпт</button>
         <span class="hint">промпт меняется от выбора: блоки = шаги, линзы = свои файлы и правила</span>
@@ -271,7 +354,7 @@ footer .dog{margin-left:auto;color:var(--dim)}
 <div class="toast" id="toast">промпт скопирован — вставь агенту</div>
 
 <script>
-/* svg-метафоры блоков: минимальная линия, 24×24 viewBox */
+/* svg-метафоры блоков */
 const IC = {
  entry:'<rect x="4" y="3" width="13" height="18" rx="2"/><path d="M13 12h8M18 9l3 3-3 3"/>',
  bounds:'<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/>',
@@ -285,7 +368,13 @@ const IC = {
  refresh:'<path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M20 3v4h-4"/>',
 };
 
-/* ссылки на примеры в GitHub */
+/* короткие имена для чипов сборки */
+const SHORT = {
+ entry:'точка входа', bounds:'границы', inventory:'инвентарь', skills:'3 скилла',
+ memory:'память', rails:'решения', inspector:'инспектор', multi:'мультитерм.',
+ insight:'инсайты', refresh:'ритуал',
+};
+
 const BASE = 'https://github.com/aPoWall/harness-setup-selfdev/blob/main/';
 const GH = {
  entry:   BASE+'examples/CLAUDE.md',
@@ -299,19 +388,10 @@ const GH = {
  multi:   BASE+'SKILL.md',
  refresh: BASE+'SKILL.md',
 };
-
-/* имена файлов-артефактов для шапки терминала */
 const FNAME = {
- entry:   'CLAUDE.md',
- bounds:  'harness-discovery.md',
- inventory:'harness-inventory.md',
- skills:  'weekly-reflect/SKILL.md',
- memory:  'memory-rules.md',
- rails:   'decision-rails.md',
- inspector:'week-1-log.md',
- insight: 'week-1-log.md',
- multi:   'SKILL.md',
- refresh: 'SKILL.md',
+ entry:'CLAUDE.md', bounds:'harness-discovery.md', inventory:'harness-inventory.md',
+ skills:'weekly-reflect/SKILL.md', memory:'memory-rules.md', rails:'decision-rails.md',
+ inspector:'week-1-log.md', insight:'week-1-log.md', multi:'SKILL.md', refresh:'SKILL.md',
 };
 
 const BLOCKS = [
@@ -364,13 +444,14 @@ try{const sv=JSON.parse(localStorage.getItem('hcfg_v2')||'null');
   if(sv){S.lv=sv.lv||'cc';S.lenses=new Set(sv.lenses||[]);S.on=new Set(sv.on&&sv.on.length?sv.on:[...S.on]);}}catch(e){}
 function persist(){try{localStorage.setItem('hcfg_v2',JSON.stringify({lv:S.lv,lenses:[...S.lenses],on:[...S.on]}))}catch(e){}}
 
+/* ─── рендер блоков ─── */
 const grid=document.getElementById('blocks');
 BLOCKS.forEach((b,i)=>{
   const el=document.createElement('div');
   el.className='block'+(b.core?' core':'')+(S.on.has(b.id)?' on':'');
+  el.dataset.bid=b.id;
   el.style.animationDelay=(0.05*i+0.08)+'s';
 
-  // мини-терминал с превью примера
   const exHtml=`<div class="ex-wrap" data-ex>
     <div class="ex-bar">
       <span class="ex-dot" style="background:rgba(255,90,90,.5)"></span>
@@ -398,26 +479,30 @@ BLOCKS.forEach((b,i)=>{
     </div>
     ${exHtml}`;
 
-  // клик по терминальному превью → toggle open
   el.querySelector('[data-ex]').addEventListener('click', e=>{
     e.stopPropagation();
     const pre=el.querySelector('[data-pre]');
     pre.classList.toggle('open');
   });
-
-  // ссылка github не переключает блок
   if(el.querySelector('[data-gh]')){
     el.querySelector('[data-gh]').addEventListener('click', e=>e.stopPropagation());
   }
-
   el.addEventListener('click',e=>{
     if(e.target.closest('[data-ex]'))return;
     S.on.has(b.id)?S.on.delete(b.id):S.on.add(b.id);
-    el.classList.toggle('on');el.querySelector('.sym').textContent=S.on.has(b.id)?'◆':'◇';
-    persist();render();});
+    el.classList.toggle('on');
+    el.querySelector('.sym').textContent=S.on.has(b.id)?'◆':'◇';
+    persist();render();
+  });
   grid.appendChild(el);
 });
 
+/* dimming класс has-sel */
+function updateGridDim(){
+  grid.classList.toggle('has-sel', S.on.size>0);
+}
+
+/* ─── seg / lens ─── */
 document.querySelectorAll('#seg button').forEach(btn=>{
   if(btn.dataset.lv===S.lv){document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');}
   btn.onclick=()=>{S.lv=btn.dataset.lv;
@@ -431,29 +516,32 @@ document.querySelectorAll('.lens').forEach(ch=>{
     ch.classList.toggle('on');persist();render();};
 });
 
+/* ─── compose: возвращает {parts, plain} ─── */
 function compose(){
   const sel=BLOCKS.filter(b=>S.on.has(b.id));
   const ls=[...S.lenses].map(k=>LENSES[k]).filter(Boolean);
   const lv=S.lv==='cc'
     ?'claude code / codex cli — веди через файлы и скиллы, артефакты сохраняй сам'
     :'обычный чат-бот без файловой системы — артефакты выдавай текстом, я сохраняю в заметки руками';
-  const steps=[];
-  sel.forEach(b=>steps.push(`${b.t} — ${b.ins}. артефакт: ${b.art}.`));
-  ls.forEach(l=>steps.push(`${l.ins}.`));
-  const numbered=steps.map((s,i)=>`${i+1}. ${s}`).join('\n');
+
+  // собираем нумерованные пункты с метой
+  const rows=[];
+  sel.forEach(b=>rows.push({kind:'block',id:b.id,text:`${b.t} — ${b.ins}. артефакт: ${b.art}.`}));
+  ls.forEach(l=>rows.push({kind:'lens',text:`${l.ins}.`}));
+
   const discovery=ls.length
     ?`начни с discovery: моя практика (${ls.map(l=>l.q).join(', ')}), 5–7 регулярных ai-задач, границы приватности`
     :'начни с discovery: моя практика, 5–7 регулярных ai-задач, границы приватности; подбери со мной 2–3 линзы из frameworks-digest.md репозитория';
-  return `ты — проводник по сборке моего личного ai-харнеса для практики саморазвития.
+
+  const frameHead=`ты — проводник по сборке моего личного ai-харнеса для практики саморазвития.
 
 методика: ${REPO}
 прочитай SKILL.md (raw: ${RAW}); если сети нет — попроси меня вставить текст. форма артефактов — examples/ того же репозитория (синтетический участник «м.»).
 
 мой уровень: ${lv}.
 
-собери со мной выбранное, строго по одному пункту, с моим подтверждением после каждого:
-${numbered}
-
+собери со мной выбранное, строго по одному пункту, с моим подтверждением после каждого:`;
+  const frameTail=`
 правила процесса:
 — ${discovery};
 — все файлы контура — в локальной папке selfdev/; имена-следы по naming convention {проект} {тип} описание – ГГГГ-ММ-ДД.md;
@@ -462,29 +550,117 @@ ${numbered}
 — вопросы вместо интерпретаций, без диагнозов и мотивационного тона; пункт не нужен — пропускаем без уговоров.
 
 начни сейчас: discovery, первые три вопроса.`;
+
+  // plain строка (для копирования)
+  const numbered=rows.map((r,i)=>`${i+1}. ${r.text}`).join('\n');
+  const plain=`${frameHead}\n${numbered}\n${frameTail}`;
+
+  // parts для рендера
+  const parts=[
+    {kind:'frame', text:frameHead},
+    ...rows.map((r,i)=>({kind:r.kind, id:r.id||null, num:i+1, text:r.text})),
+    {kind:'frame', text:frameTail},
+  ];
+  return {parts, plain};
 }
 
-let flashTimer=null;
-const panelPh=document.getElementById('panel-ph');
-const pre=document.getElementById('prompt'),cnt=document.getElementById('cnt');
+/* ─── рендер build-bar ─── */
+function renderBuildBar(){
+  const bar=document.getElementById('build-bar');
+  const empty=document.getElementById('build-empty');
+  // удаляем старые чипы
+  bar.querySelectorAll('.sel-chip').forEach(c=>c.remove());
+  const hasBlock=S.on.size>0;
+  const hasLens=S.lenses.size>0;
+  empty.style.display=(hasBlock||hasLens)?'none':'';
+  // чипы блоков
+  BLOCKS.filter(b=>S.on.has(b.id)).forEach(b=>{
+    const c=document.createElement('span');
+    c.className='sel-chip';
+    c.title='снять выбор';
+    c.innerHTML=`<span class="chip-sym">◆</span><span>${SHORT[b.id]}</span><span class="chip-x">✕</span>`;
+    c.onclick=()=>{
+      S.on.delete(b.id);
+      const blk=grid.querySelector(`[data-bid="${b.id}"]`);
+      if(blk){blk.classList.remove('on');blk.querySelector('.sym').textContent='◇';}
+      persist();render();
+    };
+    bar.appendChild(c);
+  });
+  // чипы линз
+  [...S.lenses].forEach(k=>{
+    const l=LENSES[k]; if(!l) return;
+    const c=document.createElement('span');
+    c.className='sel-chip lens-chip';
+    c.title='снять линзу';
+    c.innerHTML=`<span class="chip-sym">◈</span><span class="chip-prefix">линза:</span><span>${l.label}</span><span class="chip-x">✕</span>`;
+    c.onclick=()=>{
+      S.lenses.delete(k);
+      const lch=document.querySelector(`.lens[data-lens="${k}"]`);
+      if(lch)lch.classList.remove('on');
+      persist();render();
+    };
+    bar.appendChild(c);
+  });
+}
+
+/* ─── рендер промпта (структурированный вид) ─── */
+let prevParts=[];
+function renderPromptView(parts){
+  const view=document.getElementById('prompt-view');
+  // если view пустой — рисуем с нуля
+  const wasEmpty=view.children.length===0;
+
+  // сравниваем parts по ключу (kind+num+text) для flash
+  const key=p=>`${p.kind}|${p.num||''}|${p.text}`;
+  const prevKeys=new Set(prevParts.map(key));
+
+  view.innerHTML='';
+  parts.forEach(p=>{
+    if(p.kind==='frame'){
+      const d=document.createElement('div');
+      d.className='pt-frame';
+      d.textContent=p.text;
+      view.appendChild(d);
+    } else {
+      // блок или линза
+      const row=document.createElement('div');
+      const isLens=p.kind==='lens';
+      row.className='pt-row '+(isLens?'lens-row':'block-row');
+      const numCls=isLens?'lens-num':'block-num';
+      const badgeCls=isLens?'lens-badge':'block-badge';
+      const badgeTxt=isLens?'линза':'блок';
+      row.innerHTML=`<div class="pt-num ${numCls}">${p.num}</div>
+        <div class="pt-text">${p.text.replace(/</g,'&lt;')} <span class="pt-badge ${badgeCls}">${badgeTxt}</span></div>`;
+      if(!wasEmpty && !prevKeys.has(key(p))){
+        // новый/изменённый пункт — вспышка
+        row.classList.add(isLens?'flash-lens':'flash');
+        row.addEventListener('animationend',()=>row.classList.remove('flash','flash-lens'),{once:true});
+      }
+      view.appendChild(row);
+    }
+  });
+  prevParts=[...parts];
+}
+
+/* ─── главный рендер ─── */
+const cnt=document.getElementById('cnt');
 function render(){
-  const p=compose();pre.textContent=p;
-  cnt.textContent=`${S.on.size} блоков + ${S.lenses.size} линз · ${p.length} зн.`;
+  updateGridDim();
+  const {parts,plain}=compose();
+  cnt.textContent=`${S.on.size} блоков + ${S.lenses.size} линз · ${plain.length} зн.`;
   lensNote.style.display=S.lenses.size?'none':'';
-  // вспышка панели промпта
-  panelPh.classList.remove('flash');
-  void panelPh.offsetWidth; // reflow
-  panelPh.classList.add('flash');
-  if(flashTimer)clearTimeout(flashTimer);
-  flashTimer=setTimeout(()=>panelPh.classList.remove('flash'),600);
+  renderBuildBar();
+  renderPromptView(parts);
 }
 render();
 
+/* ─── copy (берёт plain) ─── */
 const toast=document.getElementById('toast');
 document.getElementById('copy').onclick=async()=>{
-  const p=compose();
-  try{await navigator.clipboard.writeText(p);}
-  catch(e){const ta=document.createElement('textarea');ta.value=p;document.body.appendChild(ta);
+  const {plain}=compose();
+  try{await navigator.clipboard.writeText(plain);}
+  catch(e){const ta=document.createElement('textarea');ta.value=plain;document.body.appendChild(ta);
     ta.select();document.execCommand('copy');ta.remove();}
   toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2200);
 };
